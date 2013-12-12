@@ -249,7 +249,8 @@ public class RuleTemplateModelDRLPersistenceImpl
         final DataProvider dataProvider = chooseDataProvider(model);
         final DataProviderCompiler tplCompiler = new DataProviderCompiler();
         final String generatedDrl = tplCompiler.compile(dataProvider,
-                                                        new ByteArrayInputStream(ruleTemplate.getBytes()));
+                                                        new ByteArrayInputStream(ruleTemplate.getBytes()),
+                                                        false );
         log.debug("generated drl:\n{}", generatedDrl);
 
         return generatedDrl;
