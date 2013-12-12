@@ -49,7 +49,6 @@ import org.drools.compiler.lang.descr.RuleDescr;
 import org.drools.core.base.evaluators.EvaluatorRegistry;
 import org.drools.core.base.evaluators.Operator;
 import org.drools.core.util.ReflectiveVisitor;
-import org.drools.core.util.StringUtils;
 import org.drools.workbench.models.commons.backend.imports.ImportsParser;
 import org.drools.workbench.models.commons.backend.imports.ImportsWriter;
 import org.drools.workbench.models.commons.backend.packages.PackageNameParser;
@@ -695,14 +694,17 @@ public class RuleModelDRLPersistenceImpl
             int printedCount = 0;
             for ( int i = 0; i < pattern.getFieldConstraints().length; i++ ) {
                 StringBuilder buffer = new StringBuilder();
-                FieldConstraint constr =  pattern.getConstraintList().getConstraints()[ i ];
+                FieldConstraint constr = pattern.getConstraintList().getConstraints()[ i ];
 
-
-                printedCount = generateConstraint(printedCount, buffer, constr);
+                printedCount = generateConstraint( printedCount,
+                                                   buffer,
+                                                   constr );
             }
         }
 
-        protected int generateConstraint(int printedCount, StringBuilder buffer, FieldConstraint constr) {
+        protected int generateConstraint( int printedCount,
+                                          final StringBuilder buffer,
+                                          final FieldConstraint constr ) {
             generateConstraint( constr,
                                 false,
                                 buffer );
@@ -716,8 +718,11 @@ public class RuleModelDRLPersistenceImpl
             return printedCount;
         }
 
-
-        protected void generateNestedConstraint(StringBuilder buf, CompositeFieldConstraint cfc, FieldConstraint[] nestedConstraints, int i, FieldConstraint nestedConstr) {
+        protected void generateNestedConstraint( final StringBuilder buf,
+                                                 final CompositeFieldConstraint cfc,
+                                                 final FieldConstraint[] nestedConstraints,
+                                                 final int i,
+                                                 final FieldConstraint nestedConstr ) {
             generateConstraint( nestedConstr,
                                 true,
                                 buf );
@@ -746,7 +751,11 @@ public class RuleModelDRLPersistenceImpl
                     for ( int i = 0; i < nestedConstraints.length; i++ ) {
                         FieldConstraint nestedConstr = nestedConstraints[ i ];
 
-                        generateNestedConstraint(buf, cfc, nestedConstraints, i, nestedConstr);
+                        generateNestedConstraint( buf,
+                                                  cfc,
+                                                  nestedConstraints,
+                                                  i,
+                                                  nestedConstr );
                     }
                 }
                 if ( nested ) {
@@ -1262,18 +1271,20 @@ public class RuleModelDRLPersistenceImpl
         private void generateSetMethodCalls( final String variableName,
                                              final ActionFieldValue[] fieldValues ) {
             for ( int i = 0; i < fieldValues.length; i++ ) {
-                generateSetMethodCall(variableName, fieldValues[i]);
+                generateSetMethodCall( variableName,
+                                       fieldValues[ i ] );
             }
         }
 
-        protected void generateSetMethodCall(String variableName, ActionFieldValue fieldValue) {
+        protected void generateSetMethodCall( final String variableName,
+                                              final ActionFieldValue fieldValue ) {
             buf.append( indentation );
             if ( isDSLEnhanced ) {
                 buf.append( ">" );
             }
             buf.append( variableName );
 
-            if ( fieldValue instanceof ActionFieldFunction) {
+            if ( fieldValue instanceof ActionFieldFunction ) {
                 buf.append( "." );
                 buf.append( fieldValue.getField() );
             } else {

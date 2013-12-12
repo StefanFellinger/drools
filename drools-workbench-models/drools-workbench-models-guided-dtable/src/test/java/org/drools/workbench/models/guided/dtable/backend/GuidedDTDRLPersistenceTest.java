@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
-import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
 import org.drools.workbench.models.datamodel.imports.Import;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.ActionExecuteWorkItem;
@@ -3251,7 +3250,6 @@ public class GuidedDTDRLPersistenceTest {
 
         GuidedDTDRLPersistence p = new GuidedDTDRLPersistence();
 
-
         // All 3 rows should render, as the code is now lower down for skipping columns with empty cells
         String[][] data = new String[][]{
                 new String[]{ "1", "desc", "Gargamel", "Pupa", "50" },
@@ -3411,7 +3409,6 @@ public class GuidedDTDRLPersistenceTest {
         assertEquals( "Gargamel",
                       result1Fp1Con1.getValue() );
 
-
         // examine the second pattern
         FactPattern result1Fp2 = (FactPattern) rm.lhs[ 1 ];
         assertEquals( 2,
@@ -3436,8 +3433,6 @@ public class GuidedDTDRLPersistenceTest {
                       result1Fp2Con2.getOperator() );
         assertEquals( "$age",
                       result1Fp2Con2.getValue() );
-
-
 
         //Row 2
         List<DTCellValue52> dtRowData2 = DataUtilities.makeDataRowList( data[ 2 ] );
@@ -4015,7 +4010,6 @@ public class GuidedDTDRLPersistenceTest {
 
         GuidedDecisionTable52 dtable = new GuidedDecisionTable52();
 
-
         // All three rows are entered, some columns with optional data
         String[][] data = new String[][]{
                 new String[]{ "1", "desc", "Gargamel", "Pupa", "50" },
@@ -4119,16 +4113,16 @@ public class GuidedDTDRLPersistenceTest {
 
         action2StartIndex = drl.indexOf( "Smurf fact0 = new Smurf();",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "fact0.setName(",
-                                         ruleStartIndex);
+                                         ruleStartIndex );
         assertFalse( action2StartIndex < ruleEndIndex );
         action2StartIndex = drl.indexOf( "fact0.setAge( 50 );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "insert( fact0 );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
 
         //Row 2
         ruleStartIndex = drl.indexOf( "//from row number: 3" );
@@ -4145,16 +4139,16 @@ public class GuidedDTDRLPersistenceTest {
 
         action2StartIndex = drl.indexOf( "Smurf fact0 = new Smurf();",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "fact0.setName( \"Pupa\" );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "fact0.setAge( 50 );",
                                          ruleStartIndex );
-        assertTrue(action2StartIndex == -1);
+        assertTrue( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "insert( fact0 );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
     }
 
     @Test
@@ -4266,16 +4260,16 @@ public class GuidedDTDRLPersistenceTest {
 
         action2StartIndex = drl.indexOf( "Smurf fact1 = new Smurf();",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "fact1.setName( \"Pupa\" );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex < ruleEndIndex);
+        assertFalse( action2StartIndex < ruleEndIndex );
         action2StartIndex = drl.indexOf( "fact1.setAge( 50 );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "insert( fact1 );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
 
         //Row 2
         ruleStartIndex = drl.indexOf( "//from row number: 3" );
@@ -4292,16 +4286,16 @@ public class GuidedDTDRLPersistenceTest {
 
         action2StartIndex = drl.indexOf( "Smurf fact1 = new Smurf();",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "fact1.setName( \"Pupa\" );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "fact1.setAge( 50 );",
                                          ruleStartIndex );
-        assertTrue(action2StartIndex == -1);
+        assertTrue( action2StartIndex == -1 );
         action2StartIndex = drl.indexOf( "insert( fact1 );",
                                          ruleStartIndex );
-        assertFalse(action2StartIndex == -1);
+        assertFalse( action2StartIndex == -1 );
     }
 
     @Test

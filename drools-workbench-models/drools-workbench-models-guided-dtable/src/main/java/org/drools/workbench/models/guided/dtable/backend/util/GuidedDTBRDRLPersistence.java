@@ -15,11 +15,13 @@
  */
 package org.drools.workbench.models.guided.dtable.backend.util;
 
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.drools.core.util.StringUtils;
-import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
-import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
 import org.drools.workbench.models.commons.backend.rule.DRLConstraintValueBuilder;
-import org.drools.workbench.models.datamodel.rule.ActionFieldFunction;
+import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
 import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
@@ -29,10 +31,6 @@ import org.drools.workbench.models.datamodel.rule.FreeFormLine;
 import org.drools.workbench.models.datamodel.rule.FromCollectCompositeFactPattern;
 import org.drools.workbench.models.datamodel.rule.IFactPattern;
 import org.drools.workbench.models.datamodel.rule.SingleFieldConstraint;
-
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A specialised implementation of BRDELPersistence that can expand Template
@@ -44,7 +42,7 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
 
     private static final Pattern patternTemplateKey = Pattern.compile( "@\\{(.+?)\\}" );
 
-    public GuidedDTBRDRLPersistence( TemplateDataProvider rowDataProvider ) {
+    public GuidedDTBRDRLPersistence( final TemplateDataProvider rowDataProvider ) {
         if ( rowDataProvider == null ) {
             throw new NullPointerException( "rowDataProvider cannot be null" );
         }
@@ -52,10 +50,10 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
     }
 
     @Override
-    protected LHSPatternVisitor getLHSPatternVisitor( boolean isDSLEnhanced,
-                                                      StringBuilder buf,
-                                                      String nestedIndentation,
-                                                      boolean isNegated ) {
+    protected LHSPatternVisitor getLHSPatternVisitor( final boolean isDSLEnhanced,
+                                                      final StringBuilder buf,
+                                                      final String nestedIndentation,
+                                                      final boolean isNegated ) {
         return new LHSPatternVisitor( isDSLEnhanced,
                                       rowDataProvider,
                                       bindingsPatterns,
@@ -67,9 +65,9 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
     }
 
     @Override
-    protected RHSActionVisitor getRHSActionVisitor( boolean isDSLEnhanced,
-                                                    StringBuilder buf,
-                                                    String indentation ) {
+    protected RHSActionVisitor getRHSActionVisitor( final boolean isDSLEnhanced,
+                                                    final StringBuilder buf,
+                                                    final String indentation ) {
         return new RHSActionVisitor( isDSLEnhanced,
                                      rowDataProvider,
                                      bindingsPatterns,
@@ -84,14 +82,14 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
 
         private TemplateDataProvider rowDataProvider;
 
-        public LHSPatternVisitor( boolean isDSLEnhanced,
-                                  TemplateDataProvider rowDataProvider,
-                                  Map<String, IFactPattern> bindingsPatterns,
-                                  Map<String, FieldConstraint> bindingsFields,
-                                  DRLConstraintValueBuilder constraintValueBuilder,
-                                  StringBuilder b,
-                                  String indentation,
-                                  boolean isPatternNegated ) {
+        public LHSPatternVisitor( final boolean isDSLEnhanced,
+                                  final TemplateDataProvider rowDataProvider,
+                                  final Map<String, IFactPattern> bindingsPatterns,
+                                  final Map<String, FieldConstraint> bindingsFields,
+                                  final DRLConstraintValueBuilder constraintValueBuilder,
+                                  final StringBuilder b,
+                                  final String indentation,
+                                  final boolean isPatternNegated ) {
             super( isDSLEnhanced,
                    bindingsPatterns,
                    bindingsFields,
@@ -102,32 +100,43 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
             this.rowDataProvider = rowDataProvider;
         }
 
-        protected boolean isValidFieldConstraint(FieldConstraint constr) {
-            if ( constr instanceof SingleFieldConstraint && ((SingleFieldConstraint)constr).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE ) {
-                return  !StringUtils.isEmpty(rowDataProvider.getTemplateKeyValue( ((SingleFieldConstraint) constr).getValue() ));
+        protected boolean isValidFieldConstraint( final FieldConstraint constr ) {
+            if ( constr instanceof SingleFieldConstraint && ( (SingleFieldConstraint) constr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE ) {
+                return !StringUtils.isEmpty( rowDataProvider.getTemplateKeyValue( ( (SingleFieldConstraint) constr ).getValue() ) );
             }
             return true;
         }
 
-        protected int generateConstraint(int printedCount, StringBuilder buffer, FieldConstraint constr) {
+        protected int generateConstraint( int printedCount,
+                                          final StringBuilder buffer,
+                                          final FieldConstraint constr ) {
             if ( isValidFieldConstraint( constr ) ) {
-                printedCount = super.generateConstraint(printedCount, buffer, constr);
+                printedCount = super.generateConstraint( printedCount,
+                                                         buffer,
+                                                         constr );
             }
             return printedCount;
         }
 
-
-        protected void generateNestedConstraint(StringBuilder buf, CompositeFieldConstraint cfc, FieldConstraint[] nestedConstraints, int i, FieldConstraint nestedConstr) {
+        protected void generateNestedConstraint( final StringBuilder buf,
+                                                 final CompositeFieldConstraint cfc,
+                                                 final FieldConstraint[] nestedConstraints,
+                                                 final int i,
+                                                 final FieldConstraint nestedConstr ) {
             if ( isValidFieldConstraint( nestedConstr ) ) {
-                super.generateNestedConstraint(buf, cfc, nestedConstraints, i, nestedConstr);
+                super.generateNestedConstraint( buf,
+                                                cfc,
+                                                nestedConstraints,
+                                                i,
+                                                nestedConstr );
             }
         }
 
         @Override
-        protected void buildTemplateFieldValue( int type,
-                                                String fieldType,
-                                                String value,
-                                                StringBuilder buf ) {
+        protected void buildTemplateFieldValue( final int type,
+                                                final String fieldType,
+                                                final String value,
+                                                final StringBuilder buf ) {
             buf.append( " " );
             constraintValueBuilder.buildLHSFieldValue( buf,
                                                        type,
@@ -137,18 +146,20 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
         }
 
         @Override
-        public void visitFreeFormLine( FreeFormLine ffl ) {
+        public void visitFreeFormLine( final FreeFormLine ffl ) {
             StringBuffer interpolatedResult = new StringBuffer();
             final Matcher matcherTemplateKey = patternTemplateKey.matcher( ffl.getText() );
             while ( matcherTemplateKey.find() ) {
                 String varName = matcherTemplateKey.group( 1 );
-                String value = rowDataProvider.getTemplateKeyValue(varName);
-                if ( StringUtils.isEmpty( value )) {
-                    return; // all vars must be populated for a single FreeFormLine
+                String value = rowDataProvider.getTemplateKeyValue( varName );
+
+                // All vars must be populated for a single FreeFormLine
+                if ( StringUtils.isEmpty( value ) ) {
+                    return;
                 }
 
-                matcherTemplateKey.appendReplacement(interpolatedResult,
-                                                     value);
+                matcherTemplateKey.appendReplacement( interpolatedResult,
+                                                      value );
             }
             matcherTemplateKey.appendTail( interpolatedResult );
 
@@ -168,13 +179,16 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
                 final Matcher matcherTemplateKey = patternTemplateKey.matcher( ffl.getText() );
                 while ( matcherTemplateKey.find() ) {
                     String varName = matcherTemplateKey.group( 1 );
-                    String value = rowDataProvider.getTemplateKeyValue(varName);
-                    if ( StringUtils.isEmpty( value )) {
-                        return; // all vars must be populated for a single FreeFormLine
+                    String value = rowDataProvider.getTemplateKeyValue( varName );
+
+                    // All vars must be populated for a single FreeFormLine
+                    if ( StringUtils.isEmpty( value ) ) {
+                        return;
                     }
                 }
             }
-            super.visitFromCollectCompositeFactPattern(pattern, isSubPattern);
+            super.visitFromCollectCompositeFactPattern( pattern,
+                                                        isSubPattern );
 
         }
 
@@ -185,13 +199,13 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
 
         private TemplateDataProvider rowDataProvider;
 
-        public RHSActionVisitor( boolean isDSLEnhanced,
-                                 TemplateDataProvider rowDataProvider,
-                                 Map<String, IFactPattern> bindingsPatterns,
-                                 Map<String, FieldConstraint> bindingsFields,
-                                 DRLConstraintValueBuilder constraintValueBuilder,
-                                 StringBuilder b,
-                                 String indentation ) {
+        public RHSActionVisitor( final boolean isDSLEnhanced,
+                                 final TemplateDataProvider rowDataProvider,
+                                 final Map<String, IFactPattern> bindingsPatterns,
+                                 final Map<String, FieldConstraint> bindingsFields,
+                                 final DRLConstraintValueBuilder constraintValueBuilder,
+                                 final StringBuilder b,
+                                 final String indentation ) {
             super( isDSLEnhanced,
                    bindingsPatterns,
                    bindingsFields,
@@ -202,37 +216,39 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
         }
 
         @Override
-        protected void buildTemplateFieldValue( ActionFieldValue fieldValue,
-                                                StringBuilder buf ) {
+        protected void buildTemplateFieldValue( final ActionFieldValue fieldValue,
+                                                final StringBuilder buf ) {
             constraintValueBuilder.buildRHSFieldValue( buf,
                                                        fieldValue.getType(),
                                                        rowDataProvider.getTemplateKeyValue( fieldValue.getValue() ) );
         }
 
-        protected boolean isValidFieldConstraint(ActionFieldValue fieldValue) {
+        protected boolean isValidFieldConstraint( final ActionFieldValue fieldValue ) {
             if ( fieldValue.getNature() == FieldNatureType.TYPE_TEMPLATE ) {
-                return  !StringUtils.isEmpty(rowDataProvider.getTemplateKeyValue(  fieldValue.getValue() ));
+                return !StringUtils.isEmpty( rowDataProvider.getTemplateKeyValue( fieldValue.getValue() ) );
             }
             return true;
         }
 
-
-        protected void generateSetMethodCall(String variableName, ActionFieldValue fieldValue) {
-            if ( isValidFieldConstraint(fieldValue) ) {
-                super.generateSetMethodCall(variableName, fieldValue);
+        protected void generateSetMethodCall( final String variableName,
+                                              final ActionFieldValue fieldValue ) {
+            if ( isValidFieldConstraint( fieldValue ) ) {
+                super.generateSetMethodCall( variableName, fieldValue );
             }
         }
 
         @Override
-        public void visitFreeFormLine( FreeFormLine ffl ) {
+        public void visitFreeFormLine( final FreeFormLine ffl ) {
 
             StringBuffer interpolatedResult = new StringBuffer();
             final Matcher matcherTemplateKey = patternTemplateKey.matcher( ffl.getText() );
             while ( matcherTemplateKey.find() ) {
                 String varName = matcherTemplateKey.group( 1 );
-                String value = rowDataProvider.getTemplateKeyValue(varName);
-                if ( StringUtils.isEmpty( value )) {
-                    return; // all vars must be populated for a single FreeFormLine
+                String value = rowDataProvider.getTemplateKeyValue( varName );
+
+                // All vars must be populated for a single FreeFormLine
+                if ( StringUtils.isEmpty( value ) ) {
+                    return;
                 }
                 matcherTemplateKey.appendReplacement( interpolatedResult,
                                                       value );
