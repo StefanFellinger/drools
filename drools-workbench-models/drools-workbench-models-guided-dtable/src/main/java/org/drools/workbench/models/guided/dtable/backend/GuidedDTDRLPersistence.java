@@ -281,17 +281,17 @@ public class GuidedDTDRLPersistence {
                                                              ivs );
                 rmv.visit( action );
 
-                if ( ivs.size() > 0 ) {
-
-                    //Ensure every key has a value and substitute keys for values
-                    for ( InterpolationVariable variable : ivs.keySet() ) {
-                        String value = rowDataProvider.getTemplateKeyValue( variable.getVarName() );
-                        if ( "".equals( value ) ) {
-                            addAction = false;
-                            break;
-                        }
-                    }
-                }
+//                if ( ivs.size() > 0 ) {
+//
+//                    //Ensure every key has a value and substitute keys for values
+//                    for ( InterpolationVariable variable : ivs.keySet() ) {
+//                        String value = rowDataProvider.getTemplateKeyValue( variable.getVarName() );
+//                        if ( "".equals( value ) ) {
+//                            addAction = false;
+//                            break;
+//                        }
+//                    }
+//                }
 
                 if ( addAction ) {
                     addAction( action,
@@ -586,17 +586,17 @@ public class GuidedDTDRLPersistence {
                                                              ivs );
                 rmv.visit( pattern );
 
-                if ( ivs.size() > 0 ) {
-
-                    //Ensure every key has a value and substitute keys for values
-                    for ( InterpolationVariable variable : ivs.keySet() ) {
-                        String value = rowDataProvider.getTemplateKeyValue( variable.getVarName() );
-                        if ( "".equals( value ) ) {
-                            addPattern = false;
-                            break;
-                        }
-                    }
-                }
+//                if ( ivs.size() > 0 ) {
+//
+//                    //Ensure every key has a value and substitute keys for values
+//                    for ( InterpolationVariable variable : ivs.keySet() ) {
+//                        String value = rowDataProvider.getTemplateKeyValue( variable.getVarName() );
+//                        if ( "".equals( value ) ) {
+//                            addPattern = false;
+//                            break;
+//                        }
+//                    }
+//                }
 
                 if ( addPattern ) {
                     patterns.add( pattern );

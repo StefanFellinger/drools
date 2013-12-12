@@ -49,6 +49,7 @@ import org.drools.compiler.lang.descr.RuleDescr;
 import org.drools.core.base.evaluators.EvaluatorRegistry;
 import org.drools.core.base.evaluators.Operator;
 import org.drools.core.util.ReflectiveVisitor;
+import org.drools.core.util.StringUtils;
 import org.drools.workbench.models.commons.backend.imports.ImportsParser;
 import org.drools.workbench.models.commons.backend.imports.ImportsWriter;
 import org.drools.workbench.models.commons.backend.packages.PackageNameParser;
@@ -401,7 +402,7 @@ public class RuleModelDRLPersistenceImpl
 
     public static class LHSPatternVisitor extends ReflectiveVisitor {
 
-        private StringBuilder buf;
+        protected StringBuilder buf;
         private boolean isDSLEnhanced;
         private boolean isPatternNegated;
         private String indentation;
@@ -694,16 +695,36 @@ public class RuleModelDRLPersistenceImpl
             int printedCount = 0;
             for ( int i = 0; i < pattern.getFieldConstraints().length; i++ ) {
                 StringBuilder buffer = new StringBuilder();
-                generateConstraint( pattern.getConstraintList().getConstraints()[ i ],
-                                    false,
-                                    buffer );
-                if ( buffer.length() > 0 ) {
-                    if ( printedCount > 0 ) {
-                        buf.append( ", " );
-                    }
-                    buf.append( buffer );
-                    printedCount++;
+                FieldConstraint constr =  pattern.getConstraintList().getConstraints()[ i ];
+
+
+                printedCount = generateConstraint(printedCount, buffer, constr);
+            }
+        }
+
+        protected int generateConstraint(int printedCount, StringBuilder buffer, FieldConstraint constr) {
+            generateConstraint( constr,
+                                false,
+                                buffer );
+            if ( buffer.length() > 0 ) {
+                if ( printedCount > 0 ) {
+                    buf.append( ", " );
                 }
+                buf.append( buffer );
+                printedCount++;
+            }
+            return printedCount;
+        }
+
+
+        protected void generateNestedConstraint(StringBuilder buf, CompositeFieldConstraint cfc, FieldConstraint[] nestedConstraints, int i, FieldConstraint nestedConstr) {
+            generateConstraint( nestedConstr,
+                                true,
+                                buf );
+            if ( i < ( nestedConstraints.length - 1 ) ) {
+                // buf.append(" ) ");
+                buf.append( cfc.getCompositeJunctionType() + " " );
+                // buf.append(" ( ");
             }
         }
 
@@ -723,14 +744,9 @@ public class RuleModelDRLPersistenceImpl
                 FieldConstraint[] nestedConstraints = cfc.getConstraints();
                 if ( nestedConstraints != null ) {
                     for ( int i = 0; i < nestedConstraints.length; i++ ) {
-                        generateConstraint( nestedConstraints[ i ],
-                                            true,
-                                            buf );
-                        if ( i < ( nestedConstraints.length - 1 ) ) {
-                            // buf.append(" ) ");
-                            buf.append( cfc.getCompositeJunctionType() + " " );
-                            // buf.append(" ( ");
-                        }
+                        FieldConstraint nestedConstr = nestedConstraints[ i ];
+
+                        generateNestedConstraint(buf, cfc, nestedConstraints, i, nestedConstr);
                     }
                 }
                 if ( nested ) {
@@ -1055,7 +1071,7 @@ public class RuleModelDRLPersistenceImpl
 
     public static class RHSActionVisitor extends ReflectiveVisitor {
 
-        private StringBuilder buf;
+        protected StringBuilder buf;
         private boolean isDSLEnhanced;
         private String indentation;
         //        private int idx = 0;
@@ -1246,26 +1262,29 @@ public class RuleModelDRLPersistenceImpl
         private void generateSetMethodCalls( final String variableName,
                                              final ActionFieldValue[] fieldValues ) {
             for ( int i = 0; i < fieldValues.length; i++ ) {
-                buf.append( indentation );
-                if ( isDSLEnhanced ) {
-                    buf.append( ">" );
-                }
-                buf.append( variableName );
-
-                ActionFieldValue fieldValue = fieldValues[ i ];
-                if ( fieldValue instanceof ActionFieldFunction ) {
-                    buf.append( "." );
-                    buf.append( fieldValue.getField() );
-                } else {
-                    buf.append( ".set" );
-                    buf.append( Character.toUpperCase( fieldValues[ i ].getField().charAt( 0 ) ) );
-                    buf.append( fieldValues[ i ].getField().substring( 1 ) );
-                }
-                buf.append( "( " );
-                generateSetMethodCallParameterValue( buf,
-                                                     fieldValue );
-                buf.append( " );\n" );
+                generateSetMethodCall(variableName, fieldValues[i]);
             }
+        }
+
+        protected void generateSetMethodCall(String variableName, ActionFieldValue fieldValue) {
+            buf.append( indentation );
+            if ( isDSLEnhanced ) {
+                buf.append( ">" );
+            }
+            buf.append( variableName );
+
+            if ( fieldValue instanceof ActionFieldFunction) {
+                buf.append( "." );
+                buf.append( fieldValue.getField() );
+            } else {
+                buf.append( ".set" );
+                buf.append( Character.toUpperCase( fieldValue.getField().charAt( 0 ) ) );
+                buf.append( fieldValue.getField().substring( 1 ) );
+            }
+            buf.append( "( " );
+            generateSetMethodCallParameterValue( buf,
+                                                 fieldValue );
+            buf.append( " );\n" );
         }
 
         private void generateSetMethodCallParameterValue( final StringBuilder buf,
