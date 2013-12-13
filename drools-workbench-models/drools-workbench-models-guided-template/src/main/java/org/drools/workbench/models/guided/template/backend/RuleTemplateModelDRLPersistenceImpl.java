@@ -105,29 +105,29 @@ public class RuleTemplateModelDRLPersistenceImpl
                    isPatternNegated );
         }
 
-        public void preGenerateConstraints(int depth) {
-            buf.append( "@code{hasPriorCommaConstraint"+depth+" = false}" );
+        public void preGenerateConstraints( int depth ) {
+            buf.append( "@code{hasPriorCommaConstraint" + depth + " = false}" );
         }
 
-        public void preGenerateJunctions(int depth) {
-            buf.append( "@code{hasPriorJunctionConstraint"+depth+" = false}" );
+        public void preGenerateJunctions( int depth ) {
+            buf.append( "@code{hasPriorJunctionConstraint" + depth + " = false}" );
         }
 
         @Override
         protected void generateConstraint( final StringBuilder buffer,
                                            final FieldConstraint constr,
                                            int constraintIndex,
-                                           int depth) {
-            boolean hasValue = hasValue(constr);
+                                           int depth ) {
+            boolean hasValue = hasValue( constr );
             if ( hasValue ) {
                 buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
-                buf.append( "@code{hasPriorCommaConstraint"+depth+" = true}" );
             }
-            super.generateConstraint(buffer,
-                                     constr,
-                                     constraintIndex,
-                                     depth);
+            super.generateConstraint( buffer,
+                                      constr,
+                                      constraintIndex,
+                                      depth );
             if ( hasValue ) {
+                buf.append( "@code{hasPriorCommaConstraint" + depth + " = true}" );
                 buf.append( "@end{}" );
             }
         }
@@ -138,11 +138,10 @@ public class RuleTemplateModelDRLPersistenceImpl
                                                  final FieldConstraint[] nestedConstraints,
                                                  final FieldConstraint nestedConstr,
                                                  int constraintIndex,
-                                                 int depth) {
-            boolean hasValue = hasValue(nestedConstr);
+                                                 int depth ) {
+            boolean hasValue = hasValue( nestedConstr );
             if ( hasValue ) {
                 buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
-                buf.append( "@code{hasPriorJunctionConstraint"+depth+" = true}" );
             }
             super.generateNestedConstraint( buf,
                                             cfc,
@@ -151,14 +150,19 @@ public class RuleTemplateModelDRLPersistenceImpl
                                             constraintIndex,
                                             depth );
             if ( hasValue ) {
+                buf.append( "@code{hasPriorJunctionConstraint" + depth + " = true}" );
                 buf.append( "@end{}" );
             }
         }
 
-        private boolean hasValue(FieldConstraint nestedConstr) {return nestedConstr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) nestedConstr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;}
+        private boolean hasValue( FieldConstraint nestedConstr ) {
+            return nestedConstr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) nestedConstr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
+        }
 
-        public void generateJunction(int constraintIndex, int depth, CompositeFieldConstraint cfc) {
-            boolean hasValue = hasValue(cfc);
+        public void generateJunction( int constraintIndex,
+                                      int depth,
+                                      CompositeFieldConstraint cfc ) {
+            boolean hasValue = hasValue( cfc );
             if ( constraintIndex != 0 ) {
                 if ( hasValue ) {
                     buf.append( "@if{ hasPriorJunctionConstraint" + depth + "}" );
@@ -175,9 +179,9 @@ public class RuleTemplateModelDRLPersistenceImpl
         public void generateCommaSeparator( int constraintIndex,
                                             int depth,
                                             FieldConstraint constr ) {
-            boolean hasValue = hasValue(constr);
+            boolean hasValue = hasValue( constr );
             if ( constraintIndex != 0 ) {
-                if (hasValue) {
+                if ( hasValue ) {
                     buf.append( "@if{ hasPriorCommaConstraint" + depth + "}" );
                 }
                 buf.append( ", " );
