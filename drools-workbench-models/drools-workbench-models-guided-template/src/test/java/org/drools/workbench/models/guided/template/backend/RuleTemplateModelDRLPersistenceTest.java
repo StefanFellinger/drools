@@ -49,6 +49,72 @@ public class RuleTemplateModelDRLPersistenceTest {
     }
 
     @Test
+    public void testSimpleSingleValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        FactPattern p = new FactPattern( "Person" );
+        SingleFieldConstraint con = new SingleFieldConstraint();
+        con.setFieldType( DataType.TYPE_STRING );
+        con.setFieldName( "field1" );
+        con.setOperator( "==" );
+        con.setValue( "$f1" );
+        con.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        p.addConstraint( con );
+
+        m.addLhsItem( p );
+
+        m.addRow( new String[]{ "foo" } );
+
+        String expected = "rule \"t1_0\"" +
+                "dialect \"mvel\"\n" +
+                "when \n"
+                + "Person( field1 == \"foo\" )"
+                + "then \n"
+                + "end";
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleSingleTemplateValueSingleLiteralValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        FactPattern p = new FactPattern( "Person" );
+        SingleFieldConstraint con = new SingleFieldConstraint();
+        con.setFieldType( DataType.TYPE_STRING );
+        con.setFieldName( "field1" );
+        con.setOperator( "==" );
+        con.setValue( "$f1" );
+        con.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        p.addConstraint( con );
+
+        SingleFieldConstraint con2 = new SingleFieldConstraint();
+        con.setFieldType( DataType.TYPE_STRING );
+        con2.setFieldName( "field2" );
+        con2.setOperator( "==" );
+        con2.setValue( "bar" );
+        con2.setConstraintValueType( SingleFieldConstraint.TYPE_LITERAL );
+        p.addConstraint( con2 );
+
+        m.addLhsItem( p );
+
+        m.addRow( new String[]{ "foo" } );
+
+        String expected = "rule \"t1_0\"" +
+                "dialect \"mvel\"\n" +
+                "when \n"
+                + "Person( field1 == \"foo\", field2 == \"bar\" )"
+                + "then \n"
+                + "end";
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
     public void testSimpleBothValues() {
         TemplateModel m = new TemplateModel();
         m.name = "t1";
@@ -452,7 +518,7 @@ public class RuleTemplateModelDRLPersistenceTest {
         connective.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
         connective.setFieldType( DataType.TYPE_STRING );
         connective.setOperator( "|| ==" );
-        connective.setValue( "goo" );
+        connective.setValue( "$f2" );
 
         X.setConnectives( new ConnectiveConstraint[ 1 ] );
         X.getConnectives()[ 0 ] = connective;

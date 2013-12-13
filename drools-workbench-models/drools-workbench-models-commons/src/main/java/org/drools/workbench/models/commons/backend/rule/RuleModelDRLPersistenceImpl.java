@@ -763,6 +763,8 @@ public class RuleModelDRLPersistenceImpl
             } else {
                 generateSingleFieldConstraint( (SingleFieldConstraint) con,
                                                buffer );
+                generateSingleFieldConnectiveConstraints( (SingleFieldConstraint) con,
+                                                          buffer );
             }
             if ( buffer.length() > 0 ) {
                 if ( printedCount > 0 ) {
@@ -831,29 +833,50 @@ public class RuleModelDRLPersistenceImpl
                                              constr.getValue(),
                                              constr.getExpressionValue() );
                     }
-
-                    // and now do the connectives.
-                    if ( constr.getConnectives() != null ) {
-                        for ( int j = 0; j < constr.getConnectives().length; j++ ) {
-                            final ConnectiveConstraint conn = constr.getConnectives()[ j ];
-
-                            parameters = null;
-                            if ( conn instanceof HasParameterizedOperator ) {
-                                HasParameterizedOperator hop = (HasParameterizedOperator) conn;
-                                parameters = hop.getParameters();
-                            }
-
-                            addFieldRestriction( buf,
-                                                 conn.getConstraintValueType(),
-                                                 conn.getFieldType(),
-                                                 conn.getOperator(),
-                                                 parameters,
-                                                 conn.getValue(),
-                                                 conn.getExpressionValue() );
-                        }
-                    }
                 }
             }
+        }
+
+        protected void generateSingleFieldConnectiveConstraints( final SingleFieldConstraint constr,
+                                                                 final StringBuilder buf ) {
+            if ( constr.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_PREDICATE ) {
+                return;
+            }
+
+            Map<String, String> parameters = null;
+            if ( constr instanceof HasParameterizedOperator ) {
+                HasParameterizedOperator hop = constr;
+                parameters = hop.getParameters();
+            }
+
+            // and now do the connectives.
+            if ( constr.getConnectives() != null ) {
+                for ( int j = 0; j < constr.getConnectives().length; j++ ) {
+                    final ConnectiveConstraint conn = constr.getConnectives()[ j ];
+
+                    parameters = null;
+                    if ( conn instanceof HasParameterizedOperator ) {
+                        HasParameterizedOperator hop = (HasParameterizedOperator) conn;
+                        parameters = hop.getParameters();
+                    }
+
+                    addConnectiveConstraint( buf,
+                                             conn,
+                                             parameters );
+                }
+            }
+        }
+
+        protected void addConnectiveConstraint( final StringBuilder buf,
+                                                final ConnectiveConstraint conn,
+                                                final Map<String, String> parameters ) {
+            addFieldRestriction( buf,
+                                 conn.getConstraintValueType(),
+                                 conn.getFieldType(),
+                                 conn.getOperator(),
+                                 parameters,
+                                 conn.getValue(),
+                                 conn.getExpressionValue() );
         }
 
         private void assertConstraintValue( final SingleFieldConstraint sfc ) {

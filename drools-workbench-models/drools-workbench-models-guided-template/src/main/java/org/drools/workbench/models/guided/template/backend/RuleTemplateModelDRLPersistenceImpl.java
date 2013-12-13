@@ -31,6 +31,7 @@ import org.drools.workbench.models.commons.backend.rule.RuleModelPersistence;
 import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
+import org.drools.workbench.models.datamodel.rule.ConnectiveConstraint;
 import org.drools.workbench.models.datamodel.rule.FieldConstraint;
 import org.drools.workbench.models.datamodel.rule.FreeFormLine;
 import org.drools.workbench.models.datamodel.rule.FromCollectCompositeFactPattern;
@@ -108,7 +109,7 @@ public class RuleTemplateModelDRLPersistenceImpl
         protected int generateConstraint( int printedCount,
                                           final StringBuilder buffer,
                                           final FieldConstraint constr ) {
-            boolean hasValue = constr instanceof BaseSingleFieldConstraint;
+            boolean hasValue = constr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) constr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
             if ( hasValue ) {
                 buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
             }
@@ -128,7 +129,7 @@ public class RuleTemplateModelDRLPersistenceImpl
                                                  final int i,
                                                  final FieldConstraint nestedConstr,
                                                  int printedCount ) {
-            boolean hasValue = nestedConstr instanceof BaseSingleFieldConstraint;
+            boolean hasValue = nestedConstr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) nestedConstr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
             if ( hasValue ) {
                 buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
             }
@@ -141,6 +142,20 @@ public class RuleTemplateModelDRLPersistenceImpl
             if ( hasValue ) {
                 buf.append( "@end{}" );
             }
+        }
+
+        @Override
+        protected void addConnectiveConstraint( final StringBuilder buf,
+                                                final ConnectiveConstraint conn,
+                                                final Map<String, String> parameters ) {
+            boolean hasValue = conn.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
+            if ( hasValue ) {
+                buf.append( "@end{}" );
+                buf.append( "@if{" + ( (BaseSingleFieldConstraint) conn ).getValue() + " != empty}" );
+            }
+            super.addConnectiveConstraint( buf,
+                                           conn,
+                                           parameters );
         }
 
         @Override
