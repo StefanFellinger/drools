@@ -150,12 +150,14 @@ public class RuleTemplateModelDRLPersistenceImpl
                                                 final Map<String, String> parameters ) {
             boolean hasValue = conn.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
             if ( hasValue ) {
-                buf.append( "@end{}" );
                 buf.append( "@if{" + ( (BaseSingleFieldConstraint) conn ).getValue() + " != empty}" );
             }
             super.addConnectiveConstraint( buf,
                                            conn,
                                            parameters );
+            if ( hasValue ) {
+                buf.append( "@end{}" );
+            }
         }
 
         @Override

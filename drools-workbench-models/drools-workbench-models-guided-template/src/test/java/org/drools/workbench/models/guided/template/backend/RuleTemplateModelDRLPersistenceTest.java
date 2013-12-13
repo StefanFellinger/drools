@@ -18,10 +18,14 @@ package org.drools.workbench.models.guided.template.backend;
 
 import org.drools.workbench.models.commons.backend.rule.RuleModelPersistence;
 import org.drools.workbench.models.datamodel.oracle.DataType;
+import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
+import org.drools.workbench.models.datamodel.rule.ActionInsertFact;
+import org.drools.workbench.models.datamodel.rule.ActionSetField;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.ConnectiveConstraint;
 import org.drools.workbench.models.datamodel.rule.FactPattern;
+import org.drools.workbench.models.datamodel.rule.FieldNatureType;
 import org.drools.workbench.models.datamodel.rule.FreeFormLine;
 import org.drools.workbench.models.datamodel.rule.FromCollectCompositeFactPattern;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
@@ -1104,6 +1108,314 @@ public class RuleTemplateModelDRLPersistenceTest {
                 + "dialect \"mvel\"\n"
                 + "when\n"
                 + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionInsertFactBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionInsertFact aif = new ActionInsertFact( "Present" );
+        aif.setBoundName( "f0" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        aif.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        aif.addFieldValue( afv1 );
+
+        m.addRhsItem( aif );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "Present f0 = new Present();\n"
+                + "f0.setField1(\"foo\");\n"
+                + "f0.setField2(\"bar\");\n"
+                + "insert(f0);\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionInsertFactZeroValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionInsertFact aif = new ActionInsertFact( "Present" );
+        aif.setBoundName( "f0" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        aif.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        aif.addFieldValue( afv1 );
+
+        m.addRhsItem( aif );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "Present f0 = new Present();\n"
+                + "insert(f0);\n"
+                + "end";
+
+        m.addRow( new String[]{ null, null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionInsertFactFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionInsertFact aif = new ActionInsertFact( "Present" );
+        aif.setBoundName( "f0" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        aif.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        aif.addFieldValue( afv1 );
+
+        m.addRhsItem( aif );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "Present f0 = new Present();\n"
+                + "f0.setField1(\"foo\");\n"
+                + "insert(f0);\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionInsertFactSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionInsertFact aif = new ActionInsertFact( "Present" );
+        aif.setBoundName( "f0" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        aif.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        aif.addFieldValue( afv1 );
+
+        m.addRhsItem( aif );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "Present f0 = new Present();\n"
+                + "f0.setField2(\"bar\");\n"
+                + "insert(f0);\n"
+                + "end";
+
+        m.addRow( new String[]{ null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionUpdateFactBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionSetField asf = new ActionSetField( "$p" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        asf.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        asf.addFieldValue( afv1 );
+
+        m.addRhsItem( asf );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "$p.setField1(\"foo\");\n"
+                + "$p.setField2(\"bar\");\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionUpdateFactZeroValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionSetField asf = new ActionSetField( "$p" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        asf.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        asf.addFieldValue( afv1 );
+
+        m.addRhsItem( asf );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ null, null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionUpdateFactFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionSetField asf = new ActionSetField( "$p" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        asf.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        asf.addFieldValue( afv1 );
+
+        m.addRhsItem( asf );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "$p.setField1(\"foo\");\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionUpdateFactSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        fp.setBoundName( "$p" );
+        m.addLhsItem( fp );
+
+        ActionSetField asf = new ActionSetField( "$p" );
+        ActionFieldValue afv0 = new ActionFieldValue();
+        afv0.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv0.setField( "field1" );
+        afv0.setValue( "$f1" );
+        asf.addFieldValue( afv0 );
+        ActionFieldValue afv1 = new ActionFieldValue();
+        afv1.setNature( FieldNatureType.TYPE_TEMPLATE );
+        afv1.setField( "field2" );
+        afv1.setValue( "$f2" );
+        asf.addFieldValue( afv1 );
+
+        m.addRhsItem( asf );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "$p : Person()\n"
+                + "then\n"
+                + "$p.setField2(\"bar\");\n"
                 + "end";
 
         m.addRow( new String[]{ null, "bar" } );
