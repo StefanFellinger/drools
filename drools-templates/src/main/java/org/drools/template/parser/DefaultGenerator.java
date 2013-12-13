@@ -22,10 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.mvel2.integration.VariableResolver;
 import org.mvel2.integration.VariableResolverFactory;
-import org.mvel2.integration.impl.BaseVariableResolverFactory;
-import org.mvel2.integration.impl.MapVariableResolver;
+import org.mvel2.integration.impl.MapVariableResolverFactory;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.SimpleTemplateRegistry;
 import org.mvel2.templates.TemplateCompiler;
@@ -59,7 +57,7 @@ public class DefaultGenerator
                           Row row ) {
         try {
             CompiledTemplate template = getTemplate( templateName );
-            VariableResolverFactory factory = getVariableResolverFactory();
+            VariableResolverFactory factory = new MapVariableResolverFactory();
             Map<String, Object> vars = new HashMap<String, Object>();
 
             initializePriorCommaConstraints( vars );
@@ -108,39 +106,6 @@ public class DefaultGenerator
             contents = registry.getNamedTemplate( templateName );
         }
         return contents;
-    }
-
-    private VariableResolverFactory getVariableResolverFactory() {
-        return new BaseVariableResolverFactory() {
-
-            private Map<String, Object> vars = new HashMap<String, Object>();
-
-            @Override
-            public VariableResolver createVariable( String name,
-                                                    Object value ) {
-                return new MapVariableResolver( vars,
-                                                name );
-            }
-
-            @Override
-            public VariableResolver createVariable( String name,
-                                                    Object value,
-                                                    Class<?> type ) {
-                return new MapVariableResolver( vars,
-                                                name,
-                                                type );
-            }
-
-            @Override
-            public boolean isTarget( String name ) {
-                return vars.containsKey( name );
-            }
-
-            @Override
-            public boolean isResolveable( String name ) {
-                return vars.containsKey( name );
-            }
-        };
     }
 
     /*
