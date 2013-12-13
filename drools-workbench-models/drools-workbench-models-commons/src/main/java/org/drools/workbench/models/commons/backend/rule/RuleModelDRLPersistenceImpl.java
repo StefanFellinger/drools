@@ -691,42 +691,62 @@ public class RuleModelDRLPersistenceImpl
         }
 
         private void generateConstraints( final FactPattern pattern ) {
-            int printedCount = 0;
-            for ( int i = 0; i < pattern.getFieldConstraints().length; i++ ) {
+            for ( int constraintIndex = 0; constraintIndex < pattern.getFieldConstraints().length; constraintIndex++ ) {
                 StringBuilder buffer = new StringBuilder();
-                FieldConstraint constr = pattern.getConstraintList().getConstraints()[ i ];
-
-                printedCount = generateConstraint( printedCount,
-                                                   buffer,
-                                                   constr );
+                FieldConstraint constr = pattern.getConstraintList().getConstraints()[ constraintIndex ];
+                preGenerateConstraints(0);
+                generateConstraint( buffer,
+                                    constr,
+                                    constraintIndex,
+                                    0 );
             }
         }
 
-        protected int generateConstraint( int printedCount,
-                                          final StringBuilder buffer,
-                                          final FieldConstraint constr ) {
-            printedCount = generateConstraint( constr,
-                                               false,
-                                               buffer,
-                                               printedCount );
+        public void preGenerateConstraints(int depth) {
+            // empty, overriden by rule templates
+        }
+
+        public void preGenerateJunctions(int depth) {
+            // empty, overriden by rule templates
+        }
+
+        protected void generateConstraint( final StringBuilder buffer,
+                                           final FieldConstraint constr,
+                                           int constraintIndex,
+                                           int depth) {
+            generateConstraint( constr,
+                                false,
+                                buffer,
+                                constraintIndex,
+                                depth);
             buf.append( buffer );
-            return printedCount;
         }
 
         protected void generateNestedConstraint( final StringBuilder buf,
                                                  final CompositeFieldConstraint cfc,
                                                  final FieldConstraint[] nestedConstraints,
-                                                 final int i,
                                                  final FieldConstraint nestedConstr,
-                                                 int printedCount ) {
+                                                 int constraintIndex,
+                                                 int depth ) {
+            generateJunction(constraintIndex, depth, cfc);
             generateConstraint( nestedConstr,
                                 true,
                                 buf,
-                                printedCount );
-            if ( i < ( nestedConstraints.length - 1 ) ) {
+                                constraintIndex,
+                                depth );
+        }
+
+        public void generateJunction(int constraintIndex, int depth, CompositeFieldConstraint cfc) {
+            if ( constraintIndex != 0 ) {
                 // buf.append(" ) ");
                 buf.append( cfc.getCompositeJunctionType() + " " );
                 // buf.append(" ( ");
+            }
+        }
+
+        public void generateCommaSparator(int constraintIndex, int depth, FieldConstraint constr) {
+            if ( constraintIndex != 0 ) {
+                buf.append( ", " );
             }
         }
 
@@ -735,26 +755,30 @@ public class RuleModelDRLPersistenceImpl
          * in for the ones that aren't at top level. This makes for more
          * readable DRL in the most common cases.
          */
-        private int generateConstraint( final FieldConstraint con,
+        private void generateConstraint( final FieldConstraint con,
                                         final boolean nested,
                                         final StringBuilder buffer,
-                                        int printedCount ) {
+                                        int constraintIndex,
+                                        int depth) {
             if ( con instanceof CompositeFieldConstraint ) {
+                generateCommaSparator(constraintIndex, depth, con);
+
                 CompositeFieldConstraint cfc = (CompositeFieldConstraint) con;
                 if ( nested ) {
                     buffer.append( "( " );
                 }
                 FieldConstraint[] nestedConstraints = cfc.getConstraints();
                 if ( nestedConstraints != null ) {
-                    for ( int i = 0; i < nestedConstraints.length; i++ ) {
-                        int nestedPrintedCount = 0;
-                        FieldConstraint nestedConstr = nestedConstraints[ i ];
+                    int nestedDepth = depth+1;
+                    preGenerateJunctions(nestedDepth);
+                    for ( int nestdedConstraintIndex = 0; nestdedConstraintIndex < nestedConstraints.length; nestdedConstraintIndex++ ) {
+                        FieldConstraint nestedConstr = nestedConstraints[ nestdedConstraintIndex ];
                         generateNestedConstraint( buffer,
                                                   cfc,
                                                   nestedConstraints,
-                                                  i,
                                                   nestedConstr,
-                                                  nestedPrintedCount );
+                                                  nestdedConstraintIndex,
+                                                  nestedDepth);
                     }
                 }
                 if ( nested ) {
@@ -766,14 +790,6 @@ public class RuleModelDRLPersistenceImpl
                 generateSingleFieldConnectiveConstraints( (SingleFieldConstraint) con,
                                                           buffer );
             }
-            if ( buffer.length() > 0 ) {
-                if ( printedCount > 0 ) {
-                    buf.append( ", " );
-                }
-                printedCount++;
-            }
-
-            return printedCount;
         }
 
         private void generateSingleFieldConstraint( final SingleFieldConstraint constr,

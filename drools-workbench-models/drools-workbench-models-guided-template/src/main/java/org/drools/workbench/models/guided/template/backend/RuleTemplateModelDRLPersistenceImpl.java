@@ -105,42 +105,83 @@ public class RuleTemplateModelDRLPersistenceImpl
                    isPatternNegated );
         }
 
+        public void preGenerateConstraints(int depth) {
+            buf.append( "@code{hasPriorCommaConstraint"+depth+" = false}" );
+        }
+
+        public void preGenerateJunctions(int depth) {
+            buf.append( "@code{hasPriorJunctionConstraint"+depth+" = false}" );
+        }
+
         @Override
-        protected int generateConstraint( int printedCount,
-                                          final StringBuilder buffer,
-                                          final FieldConstraint constr ) {
-            boolean hasValue = constr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) constr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
+        protected void generateConstraint( final StringBuilder buffer,
+                                           final FieldConstraint constr,
+                                           int constraintIndex,
+                                           int depth) {
+            boolean hasValue = hasValue(constr);
             if ( hasValue ) {
                 buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
+                buf.append( "@code{hasPriorCommaConstraint"+depth+" = true}" );
             }
-            printedCount = super.generateConstraint( printedCount,
-                                                     buffer,
-                                                     constr );
+            super.generateConstraint(buffer,
+                                     constr,
+                                     constraintIndex,
+                                     depth);
             if ( hasValue ) {
                 buf.append( "@end{}" );
             }
-            return printedCount;
         }
 
         @Override
         protected void generateNestedConstraint( final StringBuilder buffer,
                                                  final CompositeFieldConstraint cfc,
                                                  final FieldConstraint[] nestedConstraints,
-                                                 final int i,
                                                  final FieldConstraint nestedConstr,
-                                                 int printedCount ) {
-            boolean hasValue = nestedConstr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) nestedConstr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
+                                                 int constraintIndex,
+                                                 int depth) {
+            boolean hasValue = hasValue(nestedConstr);
             if ( hasValue ) {
                 buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
+                buf.append( "@code{hasPriorJunctionConstraint"+depth+" = true}" );
             }
             super.generateNestedConstraint( buf,
                                             cfc,
                                             nestedConstraints,
-                                            i,
                                             nestedConstr,
-                                            printedCount );
+                                            constraintIndex,
+                                            depth );
             if ( hasValue ) {
                 buf.append( "@end{}" );
+            }
+        }
+
+        private boolean hasValue(FieldConstraint nestedConstr) {return nestedConstr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) nestedConstr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;}
+
+        public void generateJunction(int constraintIndex, int depth, CompositeFieldConstraint cfc) {
+            boolean hasValue = hasValue(cfc);
+            if ( constraintIndex != 0 ) {
+                if ( hasValue ) {
+                    buf.append( "@if{ hasPriorJunctionConstraint" + depth + "}" );
+                }
+
+                buf.append( cfc.getCompositeJunctionType() + " " );
+
+                if ( hasValue ) {
+                    buf.append( "@end{}" );
+                }
+            }
+        }
+
+        public void generateCommaSparator(int constraintIndex, int depth, FieldConstraint constr) {
+            boolean hasValue = hasValue(constr);
+            if ( constraintIndex != 0 ) {
+                if (hasValue) {
+                    buf.append( "@if{ hasPriorCommaConstraint" + depth + "}" );
+                }
+                buf.append( ", " );
+                if ( hasValue ) {
+                    buf.append( "@end{}" );
+                }
             }
         }
 

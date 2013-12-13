@@ -108,31 +108,32 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
         }
 
         @Override
-        protected int generateConstraint( int printedCount,
-                                          final StringBuilder buffer,
-                                          final FieldConstraint constr ) {
+        protected void generateConstraint( final StringBuilder buffer,
+                                          final FieldConstraint constr,
+                                          int contraintIndex,
+                                          int depth) {
             if ( isValidFieldConstraint( constr ) ) {
-                printedCount = super.generateConstraint( printedCount,
-                                                         buffer,
-                                                         constr );
+                super.generateConstraint( buffer,
+                                          constr,
+                                          contraintIndex,
+                                          depth);
             }
-            return printedCount;
         }
 
         @Override
         protected void generateNestedConstraint( final StringBuilder buf,
                                                  final CompositeFieldConstraint cfc,
                                                  final FieldConstraint[] nestedConstraints,
-                                                 final int i,
                                                  final FieldConstraint nestedConstr,
-                                                 int printedCount ) {
+                                                 int contraintIndex,
+                                                 int depth) {
             if ( isValidFieldConstraint( nestedConstr ) ) {
                 super.generateNestedConstraint( buf,
                                                 cfc,
                                                 nestedConstraints,
-                                                i,
                                                 nestedConstr,
-                                                printedCount );
+                                                contraintIndex,
+                                                depth);
             }
         }
 
