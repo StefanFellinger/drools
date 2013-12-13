@@ -29,6 +29,7 @@ import org.drools.workbench.models.commons.backend.rule.DRLConstraintValueBuilde
 import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
 import org.drools.workbench.models.commons.backend.rule.RuleModelPersistence;
 import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.FieldConstraint;
 import org.drools.workbench.models.datamodel.rule.FreeFormLine;
@@ -107,11 +108,16 @@ public class RuleTemplateModelDRLPersistenceImpl
         protected int generateConstraint( int printedCount,
                                           final StringBuilder buffer,
                                           final FieldConstraint constr ) {
-            buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
+            boolean hasValue = constr instanceof BaseSingleFieldConstraint;
+            if ( hasValue ) {
+                buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
+            }
             printedCount = super.generateConstraint( printedCount,
                                                      buffer,
                                                      constr );
-            buf.append( "@end{}" );
+            if ( hasValue ) {
+                buf.append( "@end{}" );
+            }
             return printedCount;
         }
 
@@ -121,15 +127,20 @@ public class RuleTemplateModelDRLPersistenceImpl
                                                  final FieldConstraint[] nestedConstraints,
                                                  final int i,
                                                  final FieldConstraint nestedConstr,
-                                                 int printedCount) {
-            buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
+                                                 int printedCount ) {
+            boolean hasValue = nestedConstr instanceof BaseSingleFieldConstraint;
+            if ( hasValue ) {
+                buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
+            }
             super.generateNestedConstraint( buf,
                                             cfc,
                                             nestedConstraints,
                                             i,
                                             nestedConstr,
                                             printedCount );
-            buf.append( "@end{}" );
+            if ( hasValue ) {
+                buf.append( "@end{}" );
+            }
         }
 
         @Override
@@ -259,11 +270,11 @@ public class RuleTemplateModelDRLPersistenceImpl
 
         final DataProvider dataProvider = chooseDataProvider( model );
         final DataProviderCompiler tplCompiler = new DataProviderCompiler();
-        final String generatedDrl = tplCompiler.compile(dataProvider,
-                                                        new ByteArrayInputStream(ruleTemplate.getBytes()),
-                                                        false );
-        
-        log.debug("generated drl:\n{}", generatedDrl);
+        final String generatedDrl = tplCompiler.compile( dataProvider,
+                                                         new ByteArrayInputStream( ruleTemplate.getBytes() ),
+                                                         false );
+
+        log.debug( "generated drl:\n{}", generatedDrl );
 
         return generatedDrl;
     }
