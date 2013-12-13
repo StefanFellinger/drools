@@ -22,6 +22,7 @@ import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.ConnectiveConstraint;
 import org.drools.workbench.models.datamodel.rule.FactPattern;
+import org.drools.workbench.models.datamodel.rule.FromCollectCompositeFactPattern;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
 import org.drools.workbench.models.datamodel.rule.SingleFieldConstraint;
 import org.drools.workbench.models.guided.template.shared.TemplateModel;
@@ -607,6 +608,294 @@ public class RuleTemplateModelDRLPersistenceTest {
                 "end\n";
 
         m.addRow( new String[]{ null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollect() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+
+        fp.addConstraint( sfc );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( new FactPattern( "java.util.List" ) );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List( ) from collect ( Person( field1 == \"foo\" ) ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollectBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+        fp.addConstraint( sfc );
+
+        FactPattern fp2 = new FactPattern( "java.util.List" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint( "size" );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setFieldType( DataType.TYPE_NUMERIC_INTEGER );
+        sfc2.setOperator( ">" );
+        sfc2.setValue( "$f2" );
+        fp2.addConstraint( sfc2 );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( fp2 );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List( size > 1 ) from collect ( Person( field1 == \"foo\" ) ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "1", "foo" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollectFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+        fp.addConstraint( sfc );
+
+        FactPattern fp2 = new FactPattern( "java.util.List" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint( "size" );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setFieldType( DataType.TYPE_NUMERIC_INTEGER );
+        sfc2.setOperator( ">" );
+        sfc2.setValue( "$f2" );
+        fp2.addConstraint( sfc2 );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( fp2 );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List( size > 1 ) from collect ( Person( ) )\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "1", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollectSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+        fp.addConstraint( sfc );
+
+        FactPattern fp2 = new FactPattern( "java.util.List" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint( "size" );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setFieldType( DataType.TYPE_NUMERIC_INTEGER );
+        sfc2.setOperator( ">" );
+        sfc2.setValue( "$f2" );
+        fp2.addConstraint( sfc2 );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( fp2 );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List() from collect ( Person( field1 == \"foo\" ) )"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ null, "foo" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollectMultipleSubPatternValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+        fp.addConstraint( sfc );
+
+        SingleFieldConstraint sfc1 = new SingleFieldConstraint( "field2" );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setOperator( "==" );
+        sfc1.setValue( "$f2" );
+        fp.addConstraint( sfc1 );
+
+        FactPattern fp2 = new FactPattern( "java.util.List" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint( "size" );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setFieldType( DataType.TYPE_NUMERIC_INTEGER );
+        sfc2.setOperator( ">" );
+        sfc2.setValue( "$f3" );
+        fp2.addConstraint( sfc2 );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( fp2 );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List( size > 1 ) from collect ( Person( field1 == \"foo\", field2 == \"bar\" ) ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "1", "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollectMultipleSubPatternValuesFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+        fp.addConstraint( sfc );
+
+        SingleFieldConstraint sfc1 = new SingleFieldConstraint( "field2" );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setOperator( "==" );
+        sfc1.setValue( "$f2" );
+        fp.addConstraint( sfc1 );
+
+        FactPattern fp2 = new FactPattern( "java.util.List" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint( "size" );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setFieldType( DataType.TYPE_NUMERIC_INTEGER );
+        sfc2.setOperator( ">" );
+        sfc2.setValue( "$f3" );
+        fp2.addConstraint( sfc2 );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( fp2 );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List( size > 1 ) from collect ( Person( field1 == \"foo\" ) ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "1", "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testSimpleFromCollectMultipleSubPatternValuesSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FactPattern fp = new FactPattern( "Person" );
+        SingleFieldConstraint sfc = new SingleFieldConstraint( "field1" );
+        sfc.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc.setFieldType( DataType.TYPE_STRING );
+        sfc.setOperator( "==" );
+        sfc.setValue( "$f1" );
+        fp.addConstraint( sfc );
+
+        SingleFieldConstraint sfc1 = new SingleFieldConstraint( "field2" );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setOperator( "==" );
+        sfc1.setValue( "$f2" );
+        fp.addConstraint( sfc1 );
+
+        FactPattern fp2 = new FactPattern( "java.util.List" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint( "size" );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setFieldType( DataType.TYPE_NUMERIC_INTEGER );
+        sfc2.setOperator( ">" );
+        sfc2.setValue( "$f3" );
+        fp2.addConstraint( sfc2 );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( fp );
+        fac.setFactPattern( fp2 );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List( size > 1 ) from collect ( Person( field2 == \"bar\" ) ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "1", null, "bar" } );
 
         checkMarshall( expected,
                        m );
