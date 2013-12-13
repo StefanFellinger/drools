@@ -22,6 +22,7 @@ import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.ConnectiveConstraint;
 import org.drools.workbench.models.datamodel.rule.FactPattern;
+import org.drools.workbench.models.datamodel.rule.FreeFormLine;
 import org.drools.workbench.models.datamodel.rule.FromCollectCompositeFactPattern;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
 import org.drools.workbench.models.datamodel.rule.SingleFieldConstraint;
@@ -896,6 +897,70 @@ public class RuleTemplateModelDRLPersistenceTest {
                 + "end";
 
         m.addRow( new String[]{ "1", null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testFreeFormLineBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
+        m.addLhsItem( ffl );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "Person( field1 == \"foo\", field2 == \"bar\" ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testFreeFormLineFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
+        m.addLhsItem( ffl );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testFreeFormLineSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
+        m.addLhsItem( ffl );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ null, "bar" } );
 
         checkMarshall( expected,
                        m );
