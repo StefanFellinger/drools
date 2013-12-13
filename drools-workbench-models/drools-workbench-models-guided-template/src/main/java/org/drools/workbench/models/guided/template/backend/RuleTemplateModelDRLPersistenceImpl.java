@@ -172,7 +172,9 @@ public class RuleTemplateModelDRLPersistenceImpl
             }
         }
 
-        public void generateCommaSparator(int constraintIndex, int depth, FieldConstraint constr) {
+        public void generateCommaSeparator( int constraintIndex,
+                                            int depth,
+                                            FieldConstraint constr ) {
             boolean hasValue = hasValue(constr);
             if ( constraintIndex != 0 ) {
                 if (hasValue) {

@@ -691,10 +691,10 @@ public class RuleModelDRLPersistenceImpl
         }
 
         private void generateConstraints( final FactPattern pattern ) {
+            preGenerateConstraints( 0 );
             for ( int constraintIndex = 0; constraintIndex < pattern.getFieldConstraints().length; constraintIndex++ ) {
                 StringBuilder buffer = new StringBuilder();
                 FieldConstraint constr = pattern.getConstraintList().getConstraints()[ constraintIndex ];
-                preGenerateConstraints(0);
                 generateConstraint( buffer,
                                     constr,
                                     constraintIndex,
@@ -702,23 +702,23 @@ public class RuleModelDRLPersistenceImpl
             }
         }
 
-        public void preGenerateConstraints(int depth) {
+        public void preGenerateConstraints( int depth ) {
             // empty, overriden by rule templates
         }
 
-        public void preGenerateJunctions(int depth) {
+        public void preGenerateJunctions( int depth ) {
             // empty, overriden by rule templates
         }
 
         protected void generateConstraint( final StringBuilder buffer,
                                            final FieldConstraint constr,
                                            int constraintIndex,
-                                           int depth) {
+                                           int depth ) {
             generateConstraint( constr,
                                 false,
                                 buffer,
                                 constraintIndex,
-                                depth);
+                                depth );
             buf.append( buffer );
         }
 
@@ -728,7 +728,7 @@ public class RuleModelDRLPersistenceImpl
                                                  final FieldConstraint nestedConstr,
                                                  int constraintIndex,
                                                  int depth ) {
-            generateJunction(constraintIndex, depth, cfc);
+            generateJunction( constraintIndex, depth, cfc );
             generateConstraint( nestedConstr,
                                 true,
                                 buf,
@@ -736,7 +736,9 @@ public class RuleModelDRLPersistenceImpl
                                 depth );
         }
 
-        public void generateJunction(int constraintIndex, int depth, CompositeFieldConstraint cfc) {
+        public void generateJunction( int constraintIndex,
+                                      int depth,
+                                      CompositeFieldConstraint cfc ) {
             if ( constraintIndex != 0 ) {
                 // buf.append(" ) ");
                 buf.append( cfc.getCompositeJunctionType() + " " );
@@ -744,7 +746,9 @@ public class RuleModelDRLPersistenceImpl
             }
         }
 
-        public void generateCommaSparator(int constraintIndex, int depth, FieldConstraint constr) {
+        public void generateCommaSeparator( int constraintIndex,
+                                            int depth,
+                                            FieldConstraint constr ) {
             if ( constraintIndex != 0 ) {
                 buf.append( ", " );
             }
@@ -756,12 +760,14 @@ public class RuleModelDRLPersistenceImpl
          * readable DRL in the most common cases.
          */
         private void generateConstraint( final FieldConstraint con,
-                                        final boolean nested,
-                                        final StringBuilder buffer,
-                                        int constraintIndex,
-                                        int depth) {
+                                         final boolean nested,
+                                         final StringBuilder buffer,
+                                         int constraintIndex,
+                                         int depth ) {
+            generateCommaSeparator( constraintIndex,
+                                    depth,
+                                    con );
             if ( con instanceof CompositeFieldConstraint ) {
-                generateCommaSparator(constraintIndex, depth, con);
 
                 CompositeFieldConstraint cfc = (CompositeFieldConstraint) con;
                 if ( nested ) {
@@ -769,8 +775,8 @@ public class RuleModelDRLPersistenceImpl
                 }
                 FieldConstraint[] nestedConstraints = cfc.getConstraints();
                 if ( nestedConstraints != null ) {
-                    int nestedDepth = depth+1;
-                    preGenerateJunctions(nestedDepth);
+                    int nestedDepth = depth + 1;
+                    preGenerateJunctions( nestedDepth );
                     for ( int nestdedConstraintIndex = 0; nestdedConstraintIndex < nestedConstraints.length; nestdedConstraintIndex++ ) {
                         FieldConstraint nestedConstr = nestedConstraints[ nestdedConstraintIndex ];
                         generateNestedConstraint( buffer,
@@ -778,7 +784,7 @@ public class RuleModelDRLPersistenceImpl
                                                   nestedConstraints,
                                                   nestedConstr,
                                                   nestdedConstraintIndex,
-                                                  nestedDepth);
+                                                  nestedDepth );
                     }
                 }
                 if ( nested ) {
