@@ -594,7 +594,7 @@ public class RuleTemplateModelDRLPersistenceTest {
         connective.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
         connective.setFieldType( DataType.TYPE_STRING );
         connective.setOperator( "|| ==" );
-        connective.setValue( "goo" );
+        connective.setValue( "$f2" );
 
         X.setConnectives( new ConnectiveConstraint[ 1 ] );
         X.getConnectives()[ 0 ] = connective;
@@ -602,7 +602,7 @@ public class RuleTemplateModelDRLPersistenceTest {
         String expected = "rule \"t1_0\"\n" +
                 "dialect \"mvel\"\n" +
                 "when\n" +
-                "Person(  )\n" +
+                "Person( field1 == \"bar\" )\n" +
                 "then\n" +
                 "end\n";
 
