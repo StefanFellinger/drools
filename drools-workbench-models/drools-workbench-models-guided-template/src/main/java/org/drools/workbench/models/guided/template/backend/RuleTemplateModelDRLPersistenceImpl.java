@@ -205,6 +205,7 @@ public class RuleTemplateModelDRLPersistenceImpl
                         }
                         buf.append( varName + " != empty" );
                         addAnd = true;
+                        found = matcherTemplateKey.find();
                     }
                     buf.append( "}" );
                     super.visitFromCollectCompositeFactPattern( pattern,

@@ -765,6 +765,88 @@ public class RuleTemplateModelDRLPersistenceTest {
     }
 
     @Test
+    public void testFromCollectFreeFormLineBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
+
+        FactPattern fp = new FactPattern( "java.util.List" );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( ffl );
+        fac.setFactPattern( fp );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "java.util.List() from collect ( Person( field1 == \"foo\", field2 == \"bar\" ) ) \n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testFromCollectFreeFormLineFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
+
+        FactPattern fp = new FactPattern( "java.util.List" );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( ffl );
+        fac.setFactPattern( fp );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testFromCollectFreeFormLineSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
+
+        FactPattern fp = new FactPattern( "java.util.List" );
+
+        FromCollectCompositeFactPattern fac = new FromCollectCompositeFactPattern();
+        fac.setRightPattern( ffl );
+        fac.setFactPattern( fp );
+        m.addLhsItem( fac );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ null, "foo" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
     public void testSimpleFromCollectMultipleSubPatternValues() {
         TemplateModel m = new TemplateModel();
         m.name = "r1";
@@ -953,6 +1035,70 @@ public class RuleTemplateModelDRLPersistenceTest {
         FreeFormLine ffl = new FreeFormLine();
         ffl.setText( "Person( field1 == \"@{f1}\", field2 == \"@{f2}\" )" );
         m.addLhsItem( ffl );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionFreeFormLineBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "System.println( \"@{f1}\" + \"@{f2}\" );" );
+        m.addRhsItem( ffl );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "System.println( \"foo\" + \"bar\" );"
+                + "end";
+
+        m.addRow( new String[]{ "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionFreeFormLineFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "System.println( \"@{f1}\" + \"@{f2}\" );" );
+        m.addRhsItem( ffl );
+
+        String expected = "rule \"r1_0\"\n"
+                + "dialect \"mvel\"\n"
+                + "when\n"
+                + "then\n"
+                + "end";
+
+        m.addRow( new String[]{ "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testActionFreeFormLineSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "r1";
+
+        FreeFormLine ffl = new FreeFormLine();
+        ffl.setText( "System.println( \"@{f1}\" + \"@{f2}\" );" );
+        m.addRhsItem( ffl );
 
         String expected = "rule \"r1_0\"\n"
                 + "dialect \"mvel\"\n"
