@@ -103,10 +103,11 @@ public class RuleTemplateModelDRLPersistenceImpl
                    isPatternNegated );
         }
 
+        @Override
         protected int generateConstraint( int printedCount,
                                           final StringBuilder buffer,
                                           final FieldConstraint constr ) {
-            buffer.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
+            buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
             printedCount = super.generateConstraint( printedCount,
                                                      buffer,
                                                      constr );
@@ -114,17 +115,20 @@ public class RuleTemplateModelDRLPersistenceImpl
             return printedCount;
         }
 
+        @Override
         protected void generateNestedConstraint( final StringBuilder buffer,
                                                  final CompositeFieldConstraint cfc,
                                                  final FieldConstraint[] nestedConstraints,
                                                  final int i,
-                                                 final FieldConstraint nestedConstr ) {
-            buffer.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
+                                                 final FieldConstraint nestedConstr,
+                                                 int printedCount) {
+            buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
             super.generateNestedConstraint( buf,
                                             cfc,
                                             nestedConstraints,
                                             i,
-                                            nestedConstr );
+                                            nestedConstr,
+                                            printedCount );
             buf.append( "@end{}" );
         }
 

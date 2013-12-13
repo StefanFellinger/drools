@@ -705,16 +705,11 @@ public class RuleModelDRLPersistenceImpl
         protected int generateConstraint( int printedCount,
                                           final StringBuilder buffer,
                                           final FieldConstraint constr ) {
-            generateConstraint( constr,
-                                false,
-                                buffer );
-            if ( buffer.length() > 0 ) {
-                if ( printedCount > 0 ) {
-                    buf.append( ", " );
-                }
-                buf.append( buffer );
-                printedCount++;
-            }
+            printedCount = generateConstraint( constr,
+                                               false,
+                                               buffer,
+                                               printedCount );
+            buf.append( buffer );
             return printedCount;
         }
 
@@ -722,10 +717,12 @@ public class RuleModelDRLPersistenceImpl
                                                  final CompositeFieldConstraint cfc,
                                                  final FieldConstraint[] nestedConstraints,
                                                  final int i,
-                                                 final FieldConstraint nestedConstr ) {
+                                                 final FieldConstraint nestedConstr,
+                                                 int printedCount ) {
             generateConstraint( nestedConstr,
                                 true,
-                                buf );
+                                buf,
+                                printedCount );
             if ( i < ( nestedConstraints.length - 1 ) ) {
                 // buf.append(" ) ");
                 buf.append( cfc.getCompositeJunctionType() + " " );
@@ -738,33 +735,43 @@ public class RuleModelDRLPersistenceImpl
          * in for the ones that aren't at top level. This makes for more
          * readable DRL in the most common cases.
          */
-        private void generateConstraint( final FieldConstraint con,
-                                         final boolean nested,
-                                         final StringBuilder buf ) {
+        private int generateConstraint( final FieldConstraint con,
+                                        final boolean nested,
+                                        final StringBuilder buffer,
+                                        int printedCount ) {
             if ( con instanceof CompositeFieldConstraint ) {
                 CompositeFieldConstraint cfc = (CompositeFieldConstraint) con;
                 if ( nested ) {
-                    buf.append( "( " );
+                    buffer.append( "( " );
                 }
                 FieldConstraint[] nestedConstraints = cfc.getConstraints();
                 if ( nestedConstraints != null ) {
                     for ( int i = 0; i < nestedConstraints.length; i++ ) {
+                        int nestedPrintedCount = 0;
                         FieldConstraint nestedConstr = nestedConstraints[ i ];
-
-                        generateNestedConstraint( buf,
+                        generateNestedConstraint( buffer,
                                                   cfc,
                                                   nestedConstraints,
                                                   i,
-                                                  nestedConstr );
+                                                  nestedConstr,
+                                                  nestedPrintedCount );
                     }
                 }
                 if ( nested ) {
-                    buf.append( ")" );
+                    buffer.append( ")" );
                 }
             } else {
                 generateSingleFieldConstraint( (SingleFieldConstraint) con,
-                                               buf );
+                                               buffer );
             }
+            if ( buffer.length() > 0 ) {
+                if ( printedCount > 0 ) {
+                    buf.append( ", " );
+                }
+                printedCount++;
+            }
+
+            return printedCount;
         }
 
         private void generateSingleFieldConstraint( final SingleFieldConstraint constr,

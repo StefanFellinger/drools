@@ -107,6 +107,7 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
             return true;
         }
 
+        @Override
         protected int generateConstraint( int printedCount,
                                           final StringBuilder buffer,
                                           final FieldConstraint constr ) {
@@ -118,17 +119,20 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
             return printedCount;
         }
 
+        @Override
         protected void generateNestedConstraint( final StringBuilder buf,
                                                  final CompositeFieldConstraint cfc,
                                                  final FieldConstraint[] nestedConstraints,
                                                  final int i,
-                                                 final FieldConstraint nestedConstr ) {
+                                                 final FieldConstraint nestedConstr,
+                                                 int printedCount ) {
             if ( isValidFieldConstraint( nestedConstr ) ) {
                 super.generateNestedConstraint( buf,
                                                 cfc,
                                                 nestedConstraints,
                                                 i,
-                                                nestedConstr );
+                                                nestedConstr,
+                                                printedCount );
             }
         }
 
