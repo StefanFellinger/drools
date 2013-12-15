@@ -16,12 +16,14 @@
 
 package org.drools.workbench.models.guided.template.backend;
 
+import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceImpl;
 import org.drools.workbench.models.commons.backend.rule.RuleModelPersistence;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
 import org.drools.workbench.models.datamodel.rule.ActionInsertFact;
 import org.drools.workbench.models.datamodel.rule.ActionSetField;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.datamodel.rule.CompositeFactPattern;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.ConnectiveConstraint;
 import org.drools.workbench.models.datamodel.rule.FactPattern;
@@ -499,6 +501,364 @@ public class RuleTemplateModelDRLPersistenceTest {
                 "end\n";
 
         m.addRow( new String[]{ null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testCompositeFactPatternBothValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        CompositeFactPattern cp = new CompositeFactPattern( CompositeFactPattern.COMPOSITE_TYPE_OR );
+        FactPattern p1 = new FactPattern( "Person" );
+        SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        p1.addConstraint( sfc1 );
+
+        FactPattern p2 = new FactPattern( "Person" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint();
+        sfc2.setFieldName( "field2" );
+        sfc2.setFieldType( DataType.TYPE_STRING );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setValue( "$f2" );
+        sfc2.setOperator( "==" );
+        p2.addConstraint( sfc2 );
+
+        cp.addFactPattern( p1 );
+        cp.addFactPattern( p2 );
+
+        m.addLhsItem( cp );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "(\n" +
+                "Person( field1 == \"foo\" )\n" +
+                "or\n" +
+                "Person( field2 == \"bar\" )\n" +
+                ")\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ "foo", "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testCompositeFactPatternFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        CompositeFactPattern cp = new CompositeFactPattern( CompositeFactPattern.COMPOSITE_TYPE_OR );
+        FactPattern p1 = new FactPattern( "Person" );
+        SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        p1.addConstraint( sfc1 );
+
+        FactPattern p2 = new FactPattern( "Person" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint();
+        sfc2.setFieldName( "field2" );
+        sfc2.setFieldType( DataType.TYPE_STRING );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setValue( "$f2" );
+        sfc2.setOperator( "==" );
+        p2.addConstraint( sfc2 );
+
+        cp.addFactPattern( p1 );
+        cp.addFactPattern( p2 );
+
+        m.addLhsItem( cp );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "(\n" +
+                "Person( field1 == \"foo\" )\n" +
+                "or\n" +
+                "Person( )\n" +
+                ")\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ "foo", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testCompositeFactPatternSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        CompositeFactPattern cp = new CompositeFactPattern( CompositeFactPattern.COMPOSITE_TYPE_OR );
+        FactPattern p1 = new FactPattern( "Person" );
+        SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        p1.addConstraint( sfc1 );
+
+        FactPattern p2 = new FactPattern( "Person" );
+        SingleFieldConstraint sfc2 = new SingleFieldConstraint();
+        sfc2.setFieldName( "field2" );
+        sfc2.setFieldType( DataType.TYPE_STRING );
+        sfc2.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc2.setValue( "$f2" );
+        sfc2.setOperator( "==" );
+        p2.addConstraint( sfc2 );
+
+        cp.addFactPattern( p1 );
+        cp.addFactPattern( p2 );
+
+        m.addLhsItem( cp );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "(\n" +
+                "Person( )\n" +
+                "or\n" +
+                "Person( field2 == \"bar\" )\n" +
+                ")\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ null, "bar" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testNestedCompositeConstraintsAllValues() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        FactPattern p = new FactPattern( "Person" );
+        CompositeFieldConstraint comp = new CompositeFieldConstraint();
+        comp.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_OR );
+        p.addConstraint( comp );
+
+        m.addLhsItem( p );
+
+        final SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        comp.addConstraint( sfc1 );
+
+        CompositeFieldConstraint comp2 = new CompositeFieldConstraint();
+        comp2.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_AND );
+        final SingleFieldConstraint comp2sfc1 = new SingleFieldConstraint();
+        comp2sfc1.setFieldType( DataType.TYPE_STRING );
+        comp2sfc1.setFieldName( "field2" );
+        comp2sfc1.setOperator( "==" );
+        comp2sfc1.setValue( "$f2" );
+        comp2sfc1.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc1 );
+
+        final SingleFieldConstraint comp2sfc2 = new SingleFieldConstraint();
+        comp2sfc2.setFieldType( DataType.TYPE_STRING );
+        comp2sfc2.setFieldName( "field3" );
+        comp2sfc2.setOperator( "==" );
+        comp2sfc2.setValue( "$f3" );
+        comp2sfc2.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc2 );
+
+        comp.addConstraint( comp2 );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "Person( field1 == \"foo\" || ( field2 == \"bar\" && field3 == \"goo\" ) )\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ "foo", "bar", "goo" } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testNestedCompositeConstraintsFirstValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        FactPattern p = new FactPattern( "Person" );
+        CompositeFieldConstraint comp = new CompositeFieldConstraint();
+        comp.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_OR );
+        p.addConstraint( comp );
+
+        m.addLhsItem( p );
+
+        final SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        comp.addConstraint( sfc1 );
+
+        CompositeFieldConstraint comp2 = new CompositeFieldConstraint();
+        comp2.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_AND );
+        final SingleFieldConstraint comp2sfc1 = new SingleFieldConstraint();
+        comp2sfc1.setFieldType( DataType.TYPE_STRING );
+        comp2sfc1.setFieldName( "field2" );
+        comp2sfc1.setOperator( "==" );
+        comp2sfc1.setValue( "$f2" );
+        comp2sfc1.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc1 );
+
+        final SingleFieldConstraint comp2sfc2 = new SingleFieldConstraint();
+        comp2sfc2.setFieldType( DataType.TYPE_STRING );
+        comp2sfc2.setFieldName( "field3" );
+        comp2sfc2.setOperator( "==" );
+        comp2sfc2.setValue( "$f3" );
+        comp2sfc2.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc2 );
+
+        comp.addConstraint( comp2 );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "Person( field1 == \"foo\" )\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ "foo", null, null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testNestedCompositeConstraintsSecondValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        FactPattern p = new FactPattern( "Person" );
+        CompositeFieldConstraint comp = new CompositeFieldConstraint();
+        comp.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_OR );
+        p.addConstraint( comp );
+
+        m.addLhsItem( p );
+
+        final SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        comp.addConstraint( sfc1 );
+
+        CompositeFieldConstraint comp2 = new CompositeFieldConstraint();
+        comp2.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_AND );
+        final SingleFieldConstraint comp2sfc1 = new SingleFieldConstraint();
+        comp2sfc1.setFieldType( DataType.TYPE_STRING );
+        comp2sfc1.setFieldName( "field2" );
+        comp2sfc1.setOperator( "==" );
+        comp2sfc1.setValue( "$f2" );
+        comp2sfc1.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc1 );
+
+        final SingleFieldConstraint comp2sfc2 = new SingleFieldConstraint();
+        comp2sfc2.setFieldType( DataType.TYPE_STRING );
+        comp2sfc2.setFieldName( "field3" );
+        comp2sfc2.setOperator( "==" );
+        comp2sfc2.setValue( "$f3" );
+        comp2sfc2.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc2 );
+
+        comp.addConstraint( comp2 );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "Person( ( field2 == \"bar\" ) )\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ null, "bar", null } );
+
+        checkMarshall( expected,
+                       m );
+    }
+
+    @Test
+    public void testNestedCompositeConstraintsThirdValue() {
+        TemplateModel m = new TemplateModel();
+        m.name = "t1";
+
+        FactPattern p = new FactPattern( "Person" );
+        CompositeFieldConstraint comp = new CompositeFieldConstraint();
+        comp.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_OR );
+        p.addConstraint( comp );
+
+        m.addLhsItem( p );
+
+        final SingleFieldConstraint sfc1 = new SingleFieldConstraint();
+        sfc1.setFieldName( "field1" );
+        sfc1.setFieldType( DataType.TYPE_STRING );
+        sfc1.setConstraintValueType( SingleFieldConstraint.TYPE_TEMPLATE );
+        sfc1.setValue( "$f1" );
+        sfc1.setOperator( "==" );
+        comp.addConstraint( sfc1 );
+
+        CompositeFieldConstraint comp2 = new CompositeFieldConstraint();
+        comp2.setCompositeJunctionType( CompositeFieldConstraint.COMPOSITE_TYPE_AND );
+        final SingleFieldConstraint comp2sfc1 = new SingleFieldConstraint();
+        comp2sfc1.setFieldType( DataType.TYPE_STRING );
+        comp2sfc1.setFieldName( "field2" );
+        comp2sfc1.setOperator( "==" );
+        comp2sfc1.setValue( "$f2" );
+        comp2sfc1.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc1 );
+
+        final SingleFieldConstraint comp2sfc2 = new SingleFieldConstraint();
+        comp2sfc2.setFieldType( DataType.TYPE_STRING );
+        comp2sfc2.setFieldName( "field3" );
+        comp2sfc2.setOperator( "==" );
+        comp2sfc2.setValue( "$f3" );
+        comp2sfc2.setConstraintValueType( BaseSingleFieldConstraint.TYPE_TEMPLATE );
+
+        comp2.addConstraint( comp2sfc2 );
+
+        comp.addConstraint( comp2 );
+
+        String expected = "rule \"t1_0\"\n" +
+                "dialect \"mvel\"\n" +
+                "when\n" +
+                "Person( ( field3 == \"goo\" ) )\n" +
+                "then\n" +
+                "end\n";
+
+        m.addRow( new String[]{ null, null, "goo" } );
 
         checkMarshall( expected,
                        m );
