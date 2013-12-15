@@ -121,16 +121,18 @@ public class RuleTemplateModelDRLPersistenceImpl
                     buf.append( var + " != empty || " );
                 }
                 buf.delete( buf.length() - 4, buf.length() );
-                buf.append( ") && (" );
 
                 GeneratorContext parentContext = gctx.getParent();
-                Set<String> parentVarsInScope = new HashSet<String>( parentContext.getVarsInScope() );
-                parentVarsInScope.removeAll( gctx.getVarsInScope() );
+                if ( parentContext != null ) {
+                    buf.append( ") && !(" );
+                    Set<String> parentVarsInScope = new HashSet<String>( parentContext.getVarsInScope() );
+                    parentVarsInScope.removeAll( gctx.getVarsInScope() );
 
-                for ( String var : parentVarsInScope ) {
-                    buf.append( var + " != empty || " );
+                    for ( String var : parentVarsInScope ) {
+                        buf.append( var + " == empty && " );
+                    }
+                    buf.delete( buf.length() - 4, buf.length() );
                 }
-                buf.delete( buf.length() - 4, buf.length() );
                 buf.append( ")}" );
             }
         }
@@ -206,14 +208,14 @@ public class RuleTemplateModelDRLPersistenceImpl
                 buf.append( "@if{ hasOutput" + gctx.getDepth() + "}" );
             }
 
+            preGenerateNestedConnector( gctx );
             if ( gctx.getDepth() == 0 ) {
                 buf.append( ", " );
             } else {
-                preGenerateNestedConnector( gctx );
                 CompositeFieldConstraint cconstr = (CompositeFieldConstraint) gctx.getParent().getFieldConstraint();
                 buf.append( cconstr.getCompositeJunctionType() + " " );
-                postGenerateNestedConnector( gctx );
             }
+            postGenerateNestedConnector( gctx );
             if ( generateTemplateCheck ) {
                 buf.append( "@end{}" );
             }
