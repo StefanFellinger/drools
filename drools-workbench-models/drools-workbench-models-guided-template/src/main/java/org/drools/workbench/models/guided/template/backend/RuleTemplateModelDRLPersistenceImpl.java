@@ -18,7 +18,9 @@ package org.drools.workbench.models.guided.template.backend;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,12 +116,22 @@ public class RuleTemplateModelDRLPersistenceImpl
         @Override
         public void preGenerateNestedConnector( GeneratorContext gctx ) {
             if ( gctx.getVarsInScope().size() > 0 ) {
-                buf.append( "@if{" );
+                buf.append( "@if{(" );
                 for ( String var : gctx.getVarsInScope() ) {
                     buf.append( var + " != empty || " );
                 }
                 buf.delete( buf.length() - 4, buf.length() );
-                buf.append( "}" );
+                buf.append( ") && (" );
+
+                GeneratorContext parentContext = gctx.getParent();
+                Set<String> parentVarsInScope = new HashSet<String>( parentContext.getVarsInScope() );
+                parentVarsInScope.removeAll( gctx.getVarsInScope() );
+
+                for ( String var : parentVarsInScope ) {
+                    buf.append( var + " != empty || " );
+                }
+                buf.delete( buf.length() - 4, buf.length() );
+                buf.append( ")}" );
             }
         }
 
