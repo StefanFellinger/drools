@@ -32,6 +32,7 @@ import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.ConnectiveConstraint;
+import org.drools.workbench.models.datamodel.rule.ExpressionFormLine;
 import org.drools.workbench.models.datamodel.rule.FieldConstraint;
 import org.drools.workbench.models.datamodel.rule.FreeFormLine;
 import org.drools.workbench.models.datamodel.rule.FromCollectCompositeFactPattern;
@@ -105,104 +106,93 @@ public class RuleTemplateModelDRLPersistenceImpl
                    isPatternNegated );
         }
 
-        public void preGenerateConstraints( int depth ) {
-            buf.append( "@code{hasPriorCommaConstraint" + depth + " = false}" );
+        public void preGenerateConstraints( GeneratorContext gctx  ) {
+            buf.append( "@code{hasOutput" + gctx.getDepth() + " = false}" );
         }
 
-        public void preGenerateJunctions( int depth ) {
-            buf.append( "@code{hasPriorJunctionConstraint" + depth + " = false}" );
-        }
 
         @Override
-        protected void generateConstraint( final StringBuilder buffer,
-                                           final FieldConstraint constr,
-                                           int constraintIndex,
-                                           int depth ) {
-            boolean hasValue = hasValue( constr );
-            if ( hasValue ) {
-                buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
+        protected void generateConstraint( final FieldConstraint constr,
+                                           GeneratorContext gctx ) {
+            boolean generateTemplateCheck = isTemplateKey( constr );
+
+            if ( generateTemplateCheck ) {
+                if ( constr instanceof SingleFieldConstraint && ((SingleFieldConstraint)constr).getConnectives() != null ) {
+                    // if there are connectives, and the first is a template key, then all templates keys must be checked up front
+                    // individual connectives, that have template keys, will still need to be checked too.
+                    SingleFieldConstraint sconstr = (SingleFieldConstraint) constr;
+                    buf.append("@if{" + ((SingleFieldConstraint) constr).getValue() + " != empty" );
+                    for ( int j = 0; j < sconstr.getConnectives().length; j++ ) {
+                        final ConnectiveConstraint conn = sconstr.getConnectives()[ j ];
+                        if ( conn.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE ) {
+                            buf.append(" || " +  conn.getValue() + " != empty" );
+                        }
+                    }
+                    buf.append("}");
+                } else {
+                    buf.append("@if{" + ((SingleFieldConstraint) constr).getValue() + " != empty}");
+                }
             }
-            super.generateConstraint( buffer,
-                                      constr,
-                                      constraintIndex,
-                                      depth );
-            if ( hasValue ) {
-                buf.append( "@code{hasPriorCommaConstraint" + depth + " = true}" );
+            super.generateConstraint(constr,
+                                     gctx);
+            if ( generateTemplateCheck ) {
+                buf.append( "@code{hasOutput" + gctx.getDepth() + " = true}" );
                 buf.append( "@end{}" );
             }
         }
 
-        @Override
-        protected void generateNestedConstraint( final StringBuilder buffer,
-                                                 final CompositeFieldConstraint cfc,
-                                                 final FieldConstraint[] nestedConstraints,
-                                                 final FieldConstraint nestedConstr,
-                                                 int constraintIndex,
-                                                 int depth ) {
-            boolean hasValue = hasValue( nestedConstr );
-            if ( hasValue ) {
-                buf.append( "@if{" + ( (SingleFieldConstraint) nestedConstr ).getValue() + " != empty}" );
-            }
-            super.generateNestedConstraint( buf,
-                                            cfc,
-                                            nestedConstraints,
-                                            nestedConstr,
-                                            constraintIndex,
-                                            depth );
-            if ( hasValue ) {
-                buf.append( "@code{hasPriorJunctionConstraint" + depth + " = true}" );
-                buf.append( "@end{}" );
-            }
-        }
-
-        private boolean hasValue( FieldConstraint nestedConstr ) {
+        private boolean isTemplateKey( FieldConstraint nestedConstr ) {
             return nestedConstr instanceof BaseSingleFieldConstraint && ( (BaseSingleFieldConstraint) nestedConstr ).getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
         }
 
-        public void generateJunction( int constraintIndex,
-                                      int depth,
-                                      CompositeFieldConstraint cfc ) {
-            boolean hasValue = hasValue( cfc );
-            if ( constraintIndex != 0 ) {
-                if ( hasValue ) {
-                    buf.append( "@if{ hasPriorJunctionConstraint" + depth + "}" );
-                }
-
-                buf.append( cfc.getCompositeJunctionType() + " " );
-
-                if ( hasValue ) {
-                    buf.append( "@end{}" );
-                }
+        public void generateSeparator( FieldConstraint constr,
+                                       GeneratorContext gctx) {
+            if (!gctx.isHasOutput() ) {
+                return;
             }
-        }
 
-        public void generateCommaSeparator( int constraintIndex,
-                                            int depth,
-                                            FieldConstraint constr ) {
-            boolean hasValue = hasValue( constr );
-            if ( constraintIndex != 0 ) {
-                if ( hasValue ) {
-                    buf.append( "@if{ hasPriorCommaConstraint" + depth + "}" );
-                }
+            boolean generateTemplateCheck = isTemplateKey( constr );
+            if ( generateTemplateCheck ) {
+                buf.append( "@if{ hasOutput" + gctx.getDepth() + "}" );
+            }
+
+            if ( gctx.getDepth() == 0 ) {
                 buf.append( ", " );
-                if ( hasValue ) {
-                    buf.append( "@end{}" );
-                }
+            } else {
+                CompositeFieldConstraint cconstr = (CompositeFieldConstraint) gctx.getParent().getFieldConstraint();
+                buf.append( cconstr.getCompositeJunctionType() + " " );
+            }
+            if ( generateTemplateCheck ) {
+                buf.append( "@end{}" );
             }
         }
 
-        @Override
-        protected void addConnectiveConstraint( final StringBuilder buf,
-                                                final ConnectiveConstraint conn,
-                                                final Map<String, String> parameters ) {
-            boolean hasValue = conn.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE;
-            if ( hasValue ) {
-                buf.append( "@if{" + ( (BaseSingleFieldConstraint) conn ).getValue() + " != empty}" );
+        protected void addConnectiveFieldRestriction( final StringBuilder buf,
+                                                      final int type,
+                                                      final String fieldType,
+                                                      String operator,
+                                                      final Map<String, String> parameters,
+                                                      final String value,
+                                                      final ExpressionFormLine expression,
+                                                      GeneratorContext gctx,
+                                                      boolean spaceBeforeOperator   ) {
+            boolean generateTemplateCheck = type == BaseSingleFieldConstraint.TYPE_TEMPLATE;
+            if ( generateTemplateCheck ) {
+                buf.append( "@if{" + value + " != empty}" );
             }
-            super.addConnectiveConstraint( buf,
-                                           conn,
-                                           parameters );
-            if ( hasValue ) {
+
+            if ( generateTemplateCheck && operator.startsWith( "||") || operator.startsWith( "&&")  ) {
+                spaceBeforeOperator = false;
+                buf.append( "@if{ hasOutput" + gctx.getDepth() + "} " );// add space here, due to split operator
+                buf.append( operator.substring(0, 2) );
+                buf.append( "@end{}" );
+                operator = operator.substring(2);
+            }
+
+            super.addConnectiveFieldRestriction(buf, type, fieldType, operator, parameters, value, expression, gctx, spaceBeforeOperator);
+
+            if ( generateTemplateCheck ) {
+                buf.append( "@code{hasOutput" + gctx.getDepth() + " = true}" );
                 buf.append( "@end{}" );
             }
         }

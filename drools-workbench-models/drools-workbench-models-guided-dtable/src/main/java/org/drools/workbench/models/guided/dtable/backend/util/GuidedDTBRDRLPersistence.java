@@ -25,6 +25,7 @@ import org.drools.workbench.models.commons.backend.rule.RuleModelDRLPersistenceI
 import org.drools.workbench.models.datamodel.rule.ActionFieldValue;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CompositeFieldConstraint;
+import org.drools.workbench.models.datamodel.rule.ExpressionFormLine;
 import org.drools.workbench.models.datamodel.rule.FieldConstraint;
 import org.drools.workbench.models.datamodel.rule.FieldNatureType;
 import org.drools.workbench.models.datamodel.rule.FreeFormLine;
@@ -108,34 +109,30 @@ public class GuidedDTBRDRLPersistence extends RuleModelDRLPersistenceImpl {
         }
 
         @Override
-        protected void generateConstraint( final StringBuilder buffer,
-                                          final FieldConstraint constr,
-                                          int contraintIndex,
-                                          int depth) {
+        protected void generateConstraint( final FieldConstraint constr,
+                                           GeneratorContext gctx) {
             if ( isValidFieldConstraint( constr ) ) {
-                super.generateConstraint( buffer,
-                                          constr,
-                                          contraintIndex,
-                                          depth);
+                super.generateConstraint( constr,
+                                          gctx);
             }
         }
 
-        @Override
-        protected void generateNestedConstraint( final StringBuilder buf,
-                                                 final CompositeFieldConstraint cfc,
-                                                 final FieldConstraint[] nestedConstraints,
-                                                 final FieldConstraint nestedConstr,
-                                                 int contraintIndex,
-                                                 int depth) {
-            if ( isValidFieldConstraint( nestedConstr ) ) {
-                super.generateNestedConstraint( buf,
-                                                cfc,
-                                                nestedConstraints,
-                                                nestedConstr,
-                                                contraintIndex,
-                                                depth);
+        protected void addConnectiveFieldRestriction( final StringBuilder buf,
+                                                      final int type,
+                                                      final String fieldType,
+                                                      String operator,
+                                                      final Map<String, String> parameters,
+                                                      final String value,
+                                                      final ExpressionFormLine expression,
+                                                      GeneratorContext gctx,
+                                                      final boolean spaceBeforeOperator   ) {
+            boolean generateTemplateCheck = type == BaseSingleFieldConstraint.TYPE_TEMPLATE;
+            if ( generateTemplateCheck && !gctx.isHasOutput() && operator.startsWith( "||") || operator.startsWith( "&&")  ) {
+                operator = operator.substring(2);
             }
+            super.addConnectiveFieldRestriction(buf, type, fieldType, operator, parameters, value, expression, gctx, true);
         }
+
 
         @Override
         protected void buildTemplateFieldValue( final int type,
