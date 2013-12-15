@@ -133,12 +133,12 @@ public class RuleTemplateModelDRLPersistenceImpl
         @Override
         public void preGenerateNestedConstraint( GeneratorContext gctx ) {
             if ( gctx.getVarsInScope().size() > 1 ) {
-                buf.append( "@if{" );
+                buf.append( "@if{!(" );
                 for ( String var : gctx.getVarsInScope() ) {
-                    buf.append( var + " != empty && " );
+                    buf.append( var + " == empty && " );
                 }
                 buf.delete( buf.length() - 4, buf.length() );
-                buf.append( "}" );
+                buf.append( ")}" );
             }
         }
 

@@ -755,7 +755,6 @@ public class RuleModelDRLPersistenceImpl
                     if ( gctx.getDepth() > 0 ) {
                         buf.append( "( " );
                     }
-                    postGenerateNestedConstraint( gctx );
                     for ( int nestedConstraintIndex = 0; nestedConstraintIndex < nestedConstraints.length; nestedConstraintIndex++ ) {
                         FieldConstraint nestedConstr = nestedConstraints[ nestedConstraintIndex ];
                         nestedGctx.setFieldConstraint( nestedConstr );
@@ -764,7 +763,6 @@ public class RuleModelDRLPersistenceImpl
                         nestedGctx.incrementIndex();
                     }
                     gctx.setHasOutput( nestedGctx.isHasOutput() );
-                    preGenerateNestedConstraint( gctx );
                     if ( gctx.getDepth() > 0 ) {
                         buf.append( ")" );
                     }

@@ -799,7 +799,7 @@ public class RuleTemplateModelDRLPersistenceTest {
         String expected = "rule \"t1_0\"\n" +
                 "dialect \"mvel\"\n" +
                 "when\n" +
-                "Person( field2 == \"bar\" )\n" +
+                "Person( ( field2 == \"bar\" ) )\n" +
                 "then\n" +
                 "end\n";
 
@@ -854,7 +854,7 @@ public class RuleTemplateModelDRLPersistenceTest {
         String expected = "rule \"t1_0\"\n" +
                 "dialect \"mvel\"\n" +
                 "when\n" +
-                "Person( field3 == \"goo\" )\n" +
+                "Person( ( field3 == \"goo\" ) )\n" +
                 "then\n" +
                 "end\n";
 
