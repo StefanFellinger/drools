@@ -113,7 +113,7 @@ public class RuleTemplateModelDRLPersistenceImpl
 
         @Override
         public void preGenerateNestedConnector( GeneratorContext gctx ) {
-            if ( gctx.getVarsInScope().size() > 1 ) {
+            if ( gctx.getVarsInScope().size() > 0 ) {
                 buf.append( "@if{" );
                 for ( String var : gctx.getVarsInScope() ) {
                     buf.append( var + " != empty || " );
@@ -125,14 +125,14 @@ public class RuleTemplateModelDRLPersistenceImpl
 
         @Override
         public void postGenerateNestedConnector( GeneratorContext gctx ) {
-            if ( gctx.getVarsInScope().size() > 1 ) {
+            if ( gctx.getVarsInScope().size() > 0 ) {
                 buf.append( "@end{}" );
             }
         }
 
         @Override
         public void preGenerateNestedConstraint( GeneratorContext gctx ) {
-            if ( gctx.getVarsInScope().size() > 1 ) {
+            if ( gctx.getVarsInScope().size() > 0 ) {
                 buf.append( "@if{!(" );
                 for ( String var : gctx.getVarsInScope() ) {
                     buf.append( var + " == empty && " );
@@ -144,7 +144,7 @@ public class RuleTemplateModelDRLPersistenceImpl
 
         @Override
         public void postGenerateNestedConstraint( GeneratorContext gctx ) {
-            if ( gctx.getVarsInScope().size() > 1 ) {
+            if ( gctx.getVarsInScope().size() > 0 ) {
                 buf.append( "@end{}" );
             }
         }
