@@ -94,9 +94,11 @@ import org.drools.workbench.models.datamodel.rule.HasParameterizedOperator;
 import org.drools.workbench.models.datamodel.rule.IAction;
 import org.drools.workbench.models.datamodel.rule.IFactPattern;
 import org.drools.workbench.models.datamodel.rule.IPattern;
+import org.drools.workbench.models.datamodel.rule.InterpolationVariable;
 import org.drools.workbench.models.datamodel.rule.RuleAttribute;
 import org.drools.workbench.models.datamodel.rule.RuleMetadata;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
+import org.drools.workbench.models.datamodel.rule.RuleModelVisitor;
 import org.drools.workbench.models.datamodel.rule.SingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.SingleFieldConstraintEBLeftSide;
 import org.drools.workbench.models.datamodel.workitems.HasBinding;
@@ -695,9 +697,9 @@ public class RuleModelDRLPersistenceImpl
             preGenerateConstraints( gctx );
             for ( int constraintIndex = 0; constraintIndex < pattern.getFieldConstraints().length; constraintIndex++ ) {
                 FieldConstraint constr = pattern.getConstraintList().getConstraints()[ constraintIndex ];
-                gctx.setFieldConstraint(constr);
-                generateConstraint(constr,
-                                   gctx);
+                gctx.setFieldConstraint( constr );
+                generateConstraint( constr,
+                                    gctx );
                 gctx.incrementIndex();
             }
         }
@@ -706,10 +708,26 @@ public class RuleModelDRLPersistenceImpl
             // empty, overriden by rule templates
         }
 
+        public void preGenerateNestedConnector( GeneratorContext gctx ) {
+            // empty, overriden by rule templates
+        }
+
+        public void postGenerateNestedConnector( GeneratorContext gctx ) {
+            // empty, overriden by rule templates
+        }
+
+        public void preGenerateNestedConstraint( GeneratorContext gctx ) {
+            // empty, overriden by rule templates
+        }
+
+        public void postGenerateNestedConstraint( GeneratorContext gctx ) {
+            // empty, overriden by rule templates
+        }
+
         public void generateSeparator( FieldConstraint constr,
-                                       GeneratorContext gctx) {
-            if (!gctx.isHasOutput() ) {
-                 return;
+                                       GeneratorContext gctx ) {
+            if ( !gctx.isHasOutput() ) {
+                return;
             }
             if ( gctx.getDepth() == 0 ) {
                 buf.append( ", " );
@@ -725,35 +743,40 @@ public class RuleModelDRLPersistenceImpl
          * readable DRL in the most common cases.
          */
         protected void generateConstraint( final FieldConstraint con,
-                                           GeneratorContext gctx) {
-            generateSeparator(con, gctx);
+                                           GeneratorContext gctx ) {
+            generateSeparator( con, gctx );
             if ( con instanceof CompositeFieldConstraint ) {
                 CompositeFieldConstraint cfc = (CompositeFieldConstraint) con;
                 FieldConstraint[] nestedConstraints = cfc.getConstraints();
                 if ( nestedConstraints != null ) {
                     GeneratorContext nestedGctx = new GeneratorContext( gctx );
                     preGenerateConstraints( nestedGctx );
+                    preGenerateNestedConstraint( gctx );
                     if ( gctx.getDepth() > 0 ) {
                         buf.append( "( " );
                     }
-                    for ( int nestdedConstraintIndex = 0; nestdedConstraintIndex < nestedConstraints.length; nestdedConstraintIndex++ ) {
-                        FieldConstraint nestedConstr = nestedConstraints[ nestdedConstraintIndex ];
-                        nestedGctx.setFieldConstraint(nestedConstr);
-                        generateConstraint(nestedConstr,
-                                           nestedGctx);
+                    postGenerateNestedConstraint( gctx );
+                    for ( int nestedConstraintIndex = 0; nestedConstraintIndex < nestedConstraints.length; nestedConstraintIndex++ ) {
+                        FieldConstraint nestedConstr = nestedConstraints[ nestedConstraintIndex ];
+                        nestedGctx.setFieldConstraint( nestedConstr );
+                        generateConstraint( nestedConstr,
+                                            nestedGctx );
                         nestedGctx.incrementIndex();
                     }
                     gctx.setHasOutput( nestedGctx.isHasOutput() );
+                    preGenerateNestedConstraint( gctx );
                     if ( gctx.getDepth() > 0 ) {
                         buf.append( ")" );
                     }
+                    postGenerateNestedConstraint( gctx );
                 }
             } else {
-                generateSingleFieldConstraint( (SingleFieldConstraint) con, gctx);
+                generateSingleFieldConstraint( (SingleFieldConstraint) con, gctx );
             }
         }
 
-        private void generateSingleFieldConstraint( final SingleFieldConstraint constr, GeneratorContext gctx ) {
+        private void generateSingleFieldConstraint( final SingleFieldConstraint constr,
+                                                    GeneratorContext gctx ) {
             if ( constr.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_PREDICATE ) {
                 buf.append( "eval( " );
                 buf.append( constr.getValue() );
@@ -791,17 +814,18 @@ public class RuleModelDRLPersistenceImpl
                         parameters = hop.getParameters();
                     }
                     if ( constr.getConnectives() == null ) {
-                        generateNormalFieldRestriction(constr, parameters);
+                        generateNormalFieldRestriction( constr, parameters );
                     } else {
-                        generateConnectiveFieldRestriction(constr, parameters, gctx);
-                     }
+                        generateConnectiveFieldRestriction( constr, parameters, gctx );
+                    }
                     gctx.setHasOutput( true );
                 }
             }
         }
 
-        private void generateNormalFieldRestriction(SingleFieldConstraint constr, Map<String, String> parameters) {
-            if ( constr instanceof SingleFieldConstraintEBLeftSide) {
+        private void generateNormalFieldRestriction( SingleFieldConstraint constr,
+                                                     Map<String, String> parameters ) {
+            if ( constr instanceof SingleFieldConstraintEBLeftSide ) {
                 SingleFieldConstraintEBLeftSide sfexp = (SingleFieldConstraintEBLeftSide) constr;
                 addFieldRestriction( buf,
                                      sfexp.getConstraintValueType(),
@@ -823,39 +847,39 @@ public class RuleModelDRLPersistenceImpl
             }
         }
 
-        private void generateConnectiveFieldRestriction(SingleFieldConstraint constr,
-                                                        Map<String, String> parameters,
-                                                        GeneratorContext gctx) {
-            GeneratorContext cctx = new GeneratorContext(gctx);
-            preGenerateConstraints(cctx);
-            cctx.setFieldConstraint(constr);
-            if ( constr instanceof SingleFieldConstraintEBLeftSide) {
+        private void generateConnectiveFieldRestriction( SingleFieldConstraint constr,
+                                                         Map<String, String> parameters,
+                                                         GeneratorContext gctx ) {
+            GeneratorContext cctx = new GeneratorContext( gctx );
+            preGenerateConstraints( cctx );
+            cctx.setFieldConstraint( constr );
+            if ( constr instanceof SingleFieldConstraintEBLeftSide ) {
                 SingleFieldConstraintEBLeftSide sfexp = (SingleFieldConstraintEBLeftSide) constr;
-                addConnectiveFieldRestriction(buf,
-                                              sfexp.getConstraintValueType(),
-                                              sfexp.getExpressionLeftSide().getGenericType(),
-                                              sfexp.getOperator(),
-                                              parameters,
-                                              sfexp.getValue(),
-                                              sfexp.getExpressionValue(),
-                                              cctx,
-                                              true);
+                addConnectiveFieldRestriction( buf,
+                                               sfexp.getConstraintValueType(),
+                                               sfexp.getExpressionLeftSide().getGenericType(),
+                                               sfexp.getOperator(),
+                                               parameters,
+                                               sfexp.getValue(),
+                                               sfexp.getExpressionValue(),
+                                               cctx,
+                                               true );
             } else {
-                addConnectiveFieldRestriction(buf,
-                                              constr.getConstraintValueType(),
-                                              constr.getFieldType(),
-                                              constr.getOperator(),
-                                              parameters,
-                                              constr.getValue(),
-                                              constr.getExpressionValue(),
-                                              cctx,
-                                              true);
+                addConnectiveFieldRestriction( buf,
+                                               constr.getConstraintValueType(),
+                                               constr.getFieldType(),
+                                               constr.getOperator(),
+                                               parameters,
+                                               constr.getValue(),
+                                               constr.getExpressionValue(),
+                                               cctx,
+                                               true );
             }
 
             for ( int j = 0; j < constr.getConnectives().length; j++ ) {
                 final ConnectiveConstraint conn = constr.getConnectives()[ j ];
 
-                if ( conn instanceof HasParameterizedOperator) {
+                if ( conn instanceof HasParameterizedOperator ) {
                     HasParameterizedOperator hop = (HasParameterizedOperator) conn;
                     parameters = hop.getParameters();
                 }
@@ -868,7 +892,7 @@ public class RuleModelDRLPersistenceImpl
                                                conn.getValue(),
                                                conn.getExpressionValue(),
                                                cctx,
-                                               true);
+                                               true );
             }
         }
 
@@ -905,15 +929,15 @@ public class RuleModelDRLPersistenceImpl
         }
 
         protected void addConnectiveFieldRestriction( final StringBuilder buf,
-                                                    final int type,
-                                                    final String fieldType,
-                                                    final String operator,
-                                                    final Map<String, String> parameters,
-                                                    final String value,
-                                                    final ExpressionFormLine expression,
-                                                    GeneratorContext gctx,
-                                                    final boolean spaceBeforeOperator  ) {
-            addFieldRestriction(buf, type, fieldType, operator, parameters, value, expression, spaceBeforeOperator);
+                                                      final int type,
+                                                      final String fieldType,
+                                                      final String operator,
+                                                      final Map<String, String> parameters,
+                                                      final String value,
+                                                      final ExpressionFormLine expression,
+                                                      GeneratorContext gctx,
+                                                      final boolean spaceBeforeOperator ) {
+            addFieldRestriction( buf, type, fieldType, operator, parameters, value, expression, spaceBeforeOperator );
         }
 
         private void addFieldRestriction( final StringBuilder buf,
@@ -927,7 +951,6 @@ public class RuleModelDRLPersistenceImpl
             if ( operator == null ) {
                 return;
             }
-
 
             if ( spaceBeforeOperator ) {
                 buf.append( " " );
@@ -2904,6 +2927,8 @@ public class RuleModelDRLPersistenceImpl
     }
 
     public static class GeneratorContext {
+
+        private Set<String> varsInScope = new HashSet<String>();
         private FieldConstraint fieldConstraint;
         private GeneratorContext parent;
         private int depth;
@@ -2913,7 +2938,7 @@ public class RuleModelDRLPersistenceImpl
         public GeneratorContext() {
         }
 
-        public GeneratorContext(GeneratorContext parent) {
+        public GeneratorContext( GeneratorContext parent ) {
             this.parent = parent;
             this.depth = parent.getDepth() + 1;
         }
@@ -2922,8 +2947,15 @@ public class RuleModelDRLPersistenceImpl
             return fieldConstraint;
         }
 
-        public void setFieldConstraint(FieldConstraint fieldConstraint) {
+        public void setFieldConstraint( FieldConstraint fieldConstraint ) {
             this.fieldConstraint = fieldConstraint;
+            this.varsInScope.clear();
+            Map<InterpolationVariable, Integer> vars = new HashMap<InterpolationVariable, Integer>();
+            RuleModelVisitor visitor = new RuleModelVisitor( vars );
+            visitor.visit( fieldConstraint );
+            for ( InterpolationVariable var : vars.keySet() ) {
+                varsInScope.add( var.getVarName() );
+            }
         }
 
         public void incrementIndex() {
@@ -2946,8 +2978,13 @@ public class RuleModelDRLPersistenceImpl
             return hasOutput;
         }
 
-        public void setHasOutput(boolean hasOutput) {
+        public void setHasOutput( boolean hasOutput ) {
             this.hasOutput = hasOutput;
         }
+
+        public Set<String> getVarsInScope() {
+            return this.varsInScope;
+        }
+
     }
 }

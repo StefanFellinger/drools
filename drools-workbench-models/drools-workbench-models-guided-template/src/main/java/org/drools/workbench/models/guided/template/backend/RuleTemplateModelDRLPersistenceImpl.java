@@ -106,10 +106,48 @@ public class RuleTemplateModelDRLPersistenceImpl
                    isPatternNegated );
         }
 
-        public void preGenerateConstraints( GeneratorContext gctx  ) {
+        @Override
+        public void preGenerateConstraints( GeneratorContext gctx ) {
             buf.append( "@code{hasOutput" + gctx.getDepth() + " = false}" );
         }
 
+        @Override
+        public void preGenerateNestedConnector( GeneratorContext gctx ) {
+            if ( gctx.getVarsInScope().size() > 1 ) {
+                buf.append( "@if{" );
+                for ( String var : gctx.getVarsInScope() ) {
+                    buf.append( var + " != empty || " );
+                }
+                buf.delete( buf.length() - 4, buf.length() );
+                buf.append( "}" );
+            }
+        }
+
+        @Override
+        public void postGenerateNestedConnector( GeneratorContext gctx ) {
+            if ( gctx.getVarsInScope().size() > 1 ) {
+                buf.append( "@end{}" );
+            }
+        }
+
+        @Override
+        public void preGenerateNestedConstraint( GeneratorContext gctx ) {
+            if ( gctx.getVarsInScope().size() > 1 ) {
+                buf.append( "@if{" );
+                for ( String var : gctx.getVarsInScope() ) {
+                    buf.append( var + " != empty && " );
+                }
+                buf.delete( buf.length() - 4, buf.length() );
+                buf.append( "}" );
+            }
+        }
+
+        @Override
+        public void postGenerateNestedConstraint( GeneratorContext gctx ) {
+            if ( gctx.getVarsInScope().size() > 1 ) {
+                buf.append( "@end{}" );
+            }
+        }
 
         @Override
         protected void generateConstraint( final FieldConstraint constr,
@@ -117,24 +155,24 @@ public class RuleTemplateModelDRLPersistenceImpl
             boolean generateTemplateCheck = isTemplateKey( constr );
 
             if ( generateTemplateCheck ) {
-                if ( constr instanceof SingleFieldConstraint && ((SingleFieldConstraint)constr).getConnectives() != null ) {
+                if ( constr instanceof SingleFieldConstraint && ( (SingleFieldConstraint) constr ).getConnectives() != null ) {
                     // if there are connectives, and the first is a template key, then all templates keys must be checked up front
                     // individual connectives, that have template keys, will still need to be checked too.
                     SingleFieldConstraint sconstr = (SingleFieldConstraint) constr;
-                    buf.append("@if{" + ((SingleFieldConstraint) constr).getValue() + " != empty" );
+                    buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty" );
                     for ( int j = 0; j < sconstr.getConnectives().length; j++ ) {
                         final ConnectiveConstraint conn = sconstr.getConnectives()[ j ];
                         if ( conn.getConstraintValueType() == BaseSingleFieldConstraint.TYPE_TEMPLATE ) {
-                            buf.append(" || " +  conn.getValue() + " != empty" );
+                            buf.append( " || " + conn.getValue() + " != empty" );
                         }
                     }
-                    buf.append("}");
+                    buf.append( "}" );
                 } else {
-                    buf.append("@if{" + ((SingleFieldConstraint) constr).getValue() + " != empty}");
+                    buf.append( "@if{" + ( (SingleFieldConstraint) constr ).getValue() + " != empty}" );
                 }
             }
-            super.generateConstraint(constr,
-                                     gctx);
+            super.generateConstraint( constr,
+                                      gctx );
             if ( generateTemplateCheck ) {
                 buf.append( "@code{hasOutput" + gctx.getDepth() + " = true}" );
                 buf.append( "@end{}" );
@@ -146,8 +184,8 @@ public class RuleTemplateModelDRLPersistenceImpl
         }
 
         public void generateSeparator( FieldConstraint constr,
-                                       GeneratorContext gctx) {
-            if (!gctx.isHasOutput() ) {
+                                       GeneratorContext gctx ) {
+            if ( !gctx.isHasOutput() ) {
                 return;
             }
 
@@ -159,8 +197,10 @@ public class RuleTemplateModelDRLPersistenceImpl
             if ( gctx.getDepth() == 0 ) {
                 buf.append( ", " );
             } else {
+                preGenerateNestedConnector( gctx );
                 CompositeFieldConstraint cconstr = (CompositeFieldConstraint) gctx.getParent().getFieldConstraint();
                 buf.append( cconstr.getCompositeJunctionType() + " " );
+                postGenerateNestedConnector( gctx );
             }
             if ( generateTemplateCheck ) {
                 buf.append( "@end{}" );
@@ -175,21 +215,21 @@ public class RuleTemplateModelDRLPersistenceImpl
                                                       final String value,
                                                       final ExpressionFormLine expression,
                                                       GeneratorContext gctx,
-                                                      boolean spaceBeforeOperator   ) {
+                                                      boolean spaceBeforeOperator ) {
             boolean generateTemplateCheck = type == BaseSingleFieldConstraint.TYPE_TEMPLATE;
             if ( generateTemplateCheck ) {
                 buf.append( "@if{" + value + " != empty}" );
             }
 
-            if ( generateTemplateCheck && operator.startsWith( "||") || operator.startsWith( "&&")  ) {
+            if ( generateTemplateCheck && operator.startsWith( "||" ) || operator.startsWith( "&&" ) ) {
                 spaceBeforeOperator = false;
                 buf.append( "@if{ hasOutput" + gctx.getDepth() + "} " );// add space here, due to split operator
-                buf.append( operator.substring(0, 2) );
+                buf.append( operator.substring( 0, 2 ) );
                 buf.append( "@end{}" );
-                operator = operator.substring(2);
+                operator = operator.substring( 2 );
             }
 
-            super.addConnectiveFieldRestriction(buf, type, fieldType, operator, parameters, value, expression, gctx, spaceBeforeOperator);
+            super.addConnectiveFieldRestriction( buf, type, fieldType, operator, parameters, value, expression, gctx, spaceBeforeOperator );
 
             if ( generateTemplateCheck ) {
                 buf.append( "@code{hasOutput" + gctx.getDepth() + " = true}" );

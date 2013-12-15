@@ -96,7 +96,7 @@ public class RuleModelVisitor {
             visitFromCollectCompositeFactPattern( (FromCollectCompositeFactPattern) o );
         } else if ( o instanceof FromCompositeFactPattern ) {
             visitFromCompositeFactPattern( (FromCompositeFactPattern) o );
-        } else if ( o instanceof DSLSentence) {
+        } else if ( o instanceof DSLSentence ) {
             visitDSLSentence( (DSLSentence) o );
         } else if ( o instanceof ActionInsertFact ) {
             visitActionFieldList( (ActionInsertFact) o );
@@ -220,7 +220,7 @@ public class RuleModelVisitor {
     private void visitSingleFieldConstraint( SingleFieldConstraint sfc ) {
         InterpolationVariable var = new InterpolationVariable( sfc.getValue(),
                                                                sfc.getFieldType(),
-                                                               factPattern.getFactType(),
+                                                               ( factPattern == null ? "" : factPattern.getFactType() ),
                                                                sfc.getFieldName() );
         if ( BaseSingleFieldConstraint.TYPE_TEMPLATE == sfc.getConstraintValueType() && !vars.containsKey( var ) ) {
             vars.put( var,
@@ -233,7 +233,7 @@ public class RuleModelVisitor {
                 final ConnectiveConstraint cc = sfc.getConnectives()[ i ];
                 InterpolationVariable ccVar = new InterpolationVariable( cc.getValue(),
                                                                          cc.getFieldType(),
-                                                                         factPattern.getFactType(),
+                                                                         ( factPattern == null ? "" : factPattern.getFactType() ),
                                                                          cc.getFieldName() );
                 if ( BaseSingleFieldConstraint.TYPE_TEMPLATE == cc.getConstraintValueType() && !vars.containsKey( ccVar ) ) {
                     vars.put( ccVar,
